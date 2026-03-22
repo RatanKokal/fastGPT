@@ -51,34 +51,33 @@ elemental real(sp) function gelu(x) result(y)
     y = 0.5_sp * x * (1 + tanh(sqrt(2 / pi) * (x + 0.044715_sp * x**3)))
 end function
 
-function softmax(x) result(y)
-    real(sp), intent(in) :: x(:,:)
-    real(sp) :: y(size(x,1),size(x,2))
+subroutine softmax(x)
+    real(sp), intent(inout) :: x(:,:)
     integer :: i
     do i = 1, size(x,2)
-        y(:,i) = exp(x(:,i) - maxval(x(:,i)))
-        y(:,i) = y(:,i) / sum(y(:,i))
+        x(:,i) = exp(x(:,i) - maxval(x(:,i)))
+        x(:,i) = x(:,i) / sum(x(:,i))
     end do
-end function
+end subroutine
 
-function layer_norm(x, g, b, eps) result(y)
+subroutine layer_norm(x, g, b, eps, y)
     real(sp), intent(in) :: x(:,:), g(:), b(:), eps
-    real(sp) :: y(size(x,1),size(x,2))
-    real(sp) :: mean(size(x,2)), variance(size(x,2))
+    real(sp), intent(out) :: y(size(x,1),size(x,2))
+    real(sp) :: mean_val(size(x,2)), variance(size(x,2))
     integer :: i
     do i = 1, size(x,2)
-        mean(i) = sum(x(:,i)) / size(x,1)
-        variance(i) = sum((x(:,i) - mean(i))**2) / size(x,1)
+        mean_val(i) = sum(x(:,i)) / size(x,1)
+        variance(i) = sum((x(:,i) - mean_val(i))**2) / size(x,1)
     end do
     do i = 1, size(x,2)
-        y(:,i) = (x(:,i) - mean(i)) / sqrt(variance(i) + eps)
+        y(:,i) = (x(:,i) - mean_val(i)) / sqrt(variance(i) + eps)
         y(:,i) = g(:) * y(:,i) + b(:)
     end do
-end function
+end subroutine
 
-function linear(x, w, b) result(y)
+subroutine linear(x, w, b, y)
     real(sp), intent(in) :: x(:,:), w(:,:), b(:)
-    real(sp) :: y(size(b,1),size(x,2))
+    real(sp), intent(out) :: y(size(b,1),size(x,2))
     integer :: i
 
     if (size(x, 2) == 1) then
@@ -89,21 +88,25 @@ function linear(x, w, b) result(y)
             y(:,i) = y(:,i) + b(:)
         end do
     end if
-end function
+end subroutine
 
-function ffn(x, fc_w, fc_b, proj_w, proj_b) result(y)
+subroutine ffn(x, fc_w, fc_b, proj_w, proj_b, y)
     real(sp), intent(in) :: x(:,:), fc_w(:,:), fc_b(:), proj_w(:,:), proj_b(:)
-    real(sp) :: y(size(x,1),size(x,2))
-    y = linear(gelu(linear(x, fc_w, fc_b)), proj_w, proj_b)
-end function
+    real(sp), intent(out) :: y(size(x,1),size(x,2))
+    real(sp) :: tmp_hidden(size(fc_b,1), size(x,2))
+    
+    call linear(x, fc_w, fc_b, tmp_hidden)
+    tmp_hidden = gelu(tmp_hidden)
+    call linear(tmp_hidden, proj_w, proj_b, y)
+end subroutine
 
-function attention_zerocopy(n_embd_head, n_seq, n_seq_x, q, k, v, mask) result(y)
+subroutine attention_zerocopy(n_embd_head, n_seq, n_seq_x, q, k, v, mask, y)
     integer, intent(in) :: n_embd_head, n_seq, n_seq_x
     real(sp), intent(in) :: q(n_embd_head, n_seq_x)
     real(sp), intent(in) :: k(n_embd_head, n_seq) 
     real(sp), intent(in) :: v(n_embd_head, n_seq)
     real(sp), intent(in) :: mask(n_seq, n_seq_x)
-    real(sp) :: y(n_embd_head, n_seq_x)
+    real(sp), intent(out) :: y(n_embd_head, n_seq_x)
     real(sp) :: tmp(n_seq, n_seq_x)
     real(sp) :: tmp_t(n_seq_x, n_seq) 
     integer :: i
@@ -122,27 +125,28 @@ function attention_zerocopy(n_embd_head, n_seq, n_seq_x, q, k, v, mask) result(y
     else
         call matmul_2d_t(q, k, tmp_t)
         tmp = transpose(tmp_t)
-        tmp = softmax(tmp / sqrt(real(n_embd_head,sp)) + mask)
+        tmp = tmp / sqrt(real(n_embd_head,sp)) + mask
+        call softmax(tmp)
         call matmul_2d(v, tmp, y)
     end if
-end function
+end subroutine
 
-function mha(n_seq, n_seq_x, n_embd, x, attn_w, attn_b, proj_w, proj_b, n_head, &
-            use_kv_cache, k_cache, v_cache) result(y)
-    integer, intent(in) :: n_seq, n_seq_x, n_embd
+subroutine mha(n_seq, n_seq_x, n_embd, x, attn_w, attn_b, proj_w, proj_b, n_head, &
+            use_kv_cache, max_seq_cache, k_cache, v_cache, y)
+    integer, intent(in) :: n_seq, n_seq_x, n_embd, max_seq_cache
     real(sp), intent(in) :: x(n_embd,n_seq_x), &
         attn_w(3*n_embd,n_embd), attn_b(3*n_embd), &
         proj_w(n_embd,n_embd), proj_b(n_embd)
     integer, intent(in) :: n_head
     logical, intent(in) :: use_kv_cache
     
-    real(sp), intent(inout) :: k_cache(n_embd/n_head, n_seq, n_head)
-    real(sp), intent(inout) :: v_cache(n_embd/n_head, n_seq, n_head)
+    real(sp), intent(inout) :: k_cache(n_embd/n_head, max_seq_cache, n_head)
+    real(sp), intent(inout) :: v_cache(n_embd/n_head, max_seq_cache, n_head)
+    real(sp), intent(out) :: y(n_embd,n_seq_x)
     
-    real(sp) :: y(n_embd,n_seq_x)
     real(sp) :: causal_mask(n_seq,n_seq_x)
     real(sp) :: x2(3*n_embd,n_seq_x)
-    real(sp) :: yy(n_embd/n_head,n_seq_x)
+    real(sp) :: tmp_y(n_embd, n_seq_x)
     integer :: i, j, l, head_dim, istart, iend
 
     head_dim = n_embd / n_head
@@ -161,7 +165,7 @@ function mha(n_seq, n_seq_x, n_embd, x, attn_w, attn_b, proj_w, proj_b, n_head, 
         end do
     end if
     
-    x2 = linear(x, attn_w, attn_b)
+    call linear(x, attn_w, attn_b, x2)
     
     if (use_kv_cache) then
         do l = 1, n_head
@@ -183,61 +187,64 @@ function mha(n_seq, n_seq_x, n_embd, x, attn_w, attn_b, proj_w, proj_b, n_head, 
         end do
     end if
     
+    !$omp parallel do default(none) private(l, istart, iend) &
+    !$omp shared(n_head, head_dim, n_seq, n_seq_x, x2, k_cache, v_cache, causal_mask, tmp_y)
     do l = 1, n_head
         istart = (l-1) * head_dim + 1
         iend   = l * head_dim
 
-        yy = attention_zerocopy(head_dim, n_seq, n_seq_x, &
+        call attention_zerocopy(head_dim, n_seq, n_seq_x, &
             x2(istart:iend, :), &
             k_cache(:, 1:n_seq, l), & 
             v_cache(:, 1:n_seq, l), &
-            causal_mask)
-
-        do i = 1, n_seq_x
-        do j = 1, head_dim
-            y(istart-1+j,i) = yy(j,i)
-        end do
-        end do
+            causal_mask, tmp_y(istart:iend, :))
     end do
+    !$omp end parallel do
     
-    y = linear(y, proj_w, proj_b)
-end function
+    call linear(tmp_y, proj_w, proj_b, y)
+end subroutine
 
-function transformer_block(n_seq, n_seq_x, n_embd, x, mlp_fc_w, mlp_fc_b, mlp_proj_w, mlp_proj_b, &
+subroutine transformer_block(n_seq, n_seq_x, n_embd, x, mlp_fc_w, mlp_fc_b, mlp_proj_w, mlp_proj_b, &
         attn_w, attn_b, attn_proj_w, attn_proj_b, ln1_g, ln1_b, ln2_g, ln2_b, &
-        n_head, use_kv_cache, k_cache, v_cache) result(y)
-    real(sp), intent(in) :: x(n_embd,n_seq_x), &
-        mlp_fc_w(:,:), mlp_fc_b(:), &
+        n_head, use_kv_cache, max_seq_cache, k_cache, v_cache)
+    real(sp), intent(inout) :: x(n_embd,n_seq_x)
+    real(sp), intent(in) :: mlp_fc_w(:,:), mlp_fc_b(:), &
         mlp_proj_w(:,:), mlp_proj_b(:), &
         attn_w(:,:), attn_b(:), attn_proj_w(:,:), attn_proj_b(:), &
         ln1_g(:), ln1_b(:), ln2_g(:), ln2_b(:)
-    integer, intent(in) :: n_head
+    integer, intent(in) :: n_head, max_seq_cache
     integer, intent(in) :: n_seq, n_seq_x, n_embd
-    real(sp) :: y(n_embd,n_seq_x)
     logical, intent(in) :: use_kv_cache
     
-    real(sp), intent(inout) :: k_cache(n_embd/n_head, n_seq, n_head)
-    real(sp), intent(inout) :: v_cache(n_embd/n_head, n_seq, n_head)
+    real(sp), intent(inout) :: k_cache(n_embd/n_head, max_seq_cache, n_head)
+    real(sp), intent(inout) :: v_cache(n_embd/n_head, max_seq_cache, n_head)
     
-    y = x + mha(n_seq, n_seq_x, n_embd, layer_norm(x, ln1_g, ln1_b, 1e-5_sp), &
-        attn_w, attn_b, attn_proj_w, attn_proj_b, n_head, use_kv_cache, k_cache, v_cache)
-    y = y + ffn(layer_norm(y, ln2_g, ln2_b, 1e-5_sp), &
-        mlp_fc_w, mlp_fc_b, mlp_proj_w, mlp_proj_b)
-end function
+    real(sp) :: norm_out(n_embd, n_seq_x)
+    real(sp) :: block_out(n_embd, n_seq_x)
+    
+    call layer_norm(x, ln1_g, ln1_b, 1e-5_sp, norm_out)
+    call mha(n_seq, n_seq_x, n_embd, norm_out, attn_w, attn_b, attn_proj_w, attn_proj_b, &
+             n_head, use_kv_cache, max_seq_cache, k_cache, v_cache, block_out)
+    x = x + block_out
+    
+    call layer_norm(x, ln2_g, ln2_b, 1e-5_sp, norm_out)
+    call ffn(norm_out, mlp_fc_w, mlp_fc_b, mlp_proj_w, mlp_proj_b, block_out)
+    x = x + block_out
+end subroutine
 
-function gpt2(n_vocab, n_ctx, n_seq, n_seq_x, n_embd, n_layer, n_head, input, &
-        wte, wpe, layers, lnf_g, lnf_b, use_kv_cache, k_cache, v_cache) result(y)
-    integer, intent(in) :: n_vocab, n_ctx, n_seq, n_seq_x, n_embd, n_layer, n_head
+subroutine gpt2(n_vocab, n_ctx, n_seq, n_seq_x, n_embd, n_layer, n_head, input, &
+        wte, wpe, layers, lnf_g, lnf_b, use_kv_cache, max_seq_cache, k_cache, v_cache, logits)
+    integer, intent(in) :: n_vocab, n_ctx, n_seq, n_seq_x, n_embd, n_layer, n_head, max_seq_cache
     integer, intent(in) :: input(n_seq)
     real(sp), intent(in) :: wte(n_vocab,n_embd), wpe(n_embd,n_ctx)
     type(layer_t), intent(in) :: layers(n_layer)
     real(sp), intent(in) :: lnf_b(n_embd), lnf_g(n_embd)
     logical, intent(in) :: use_kv_cache
     
-    real(sp), intent(inout) :: k_cache(n_embd/n_head, n_seq, n_head, n_layer)
-    real(sp), intent(inout) :: v_cache(n_embd/n_head, n_seq, n_head, n_layer)
+    real(sp), intent(inout) :: k_cache(n_embd/n_head, max_seq_cache, n_head, n_layer)
+    real(sp), intent(inout) :: v_cache(n_embd/n_head, max_seq_cache, n_head, n_layer)
+    real(sp), intent(out) :: logits(n_vocab,n_seq_x)
     
-    real(sp) :: y(n_vocab,n_seq_x)
     real(sp) :: x(n_embd,n_seq_x)
     integer :: i
     
@@ -251,23 +258,26 @@ function gpt2(n_vocab, n_ctx, n_seq, n_seq_x, n_embd, n_layer, n_head, input, &
     end if
     
     do i = 1, n_layer
-        x = transformer_block(n_seq, n_seq_x, n_embd, x, &
+        call transformer_block(n_seq, n_seq_x, n_embd, x, &
             layers(i)%mlp_fc_w, layers(i)%mlp_fc_b, &
             layers(i)%mlp_proj_w, layers(i)%mlp_proj_b, &
             layers(i)%attn_w, layers(i)%attn_b, layers(i)%attn_proj_w, layers(i)%attn_proj_b, &
             layers(i)%ln1_g, layers(i)%ln1_b, layers(i)%ln2_g, layers(i)%ln2_b, &
-            n_head, use_kv_cache, k_cache(:,:,:,i), v_cache(:,:,:,i))
+            n_head, use_kv_cache, max_seq_cache, k_cache(:,:,:,i), v_cache(:,:,:,i))
     end do
     
-    x = layer_norm(x, lnf_g, lnf_b, 1e-5)
+    block
+        real(sp) :: x_norm(n_embd, n_seq_x)
+        call layer_norm(x, lnf_g, lnf_b, 1e-5_sp, x_norm) 
+        
+        if (n_seq_x == 1) then
+            logits(:, 1) = matmul(wte, x_norm(:, 1))
+        else
+            call matmul_2d(wte, x_norm, logits)
+        end if
+    end block
     
-    ! FINAL HUGE GEMV BYPASS: Stop OpenBLAS from packing the massive vocab matrix!
-    if (n_seq_x == 1) then
-        y(:, 1) = matmul(wte, x(:, 1))
-    else
-        call matmul_2d(wte, x, y)
-    end if
-end function
+end subroutine
 
 subroutine generate(output, n_tokens_to_generate, m, &
         n_seq, input, use_cache, byte_decoder, stop_text)
@@ -279,17 +289,19 @@ subroutine generate(output, n_tokens_to_generate, m, &
     character(*), intent(in), optional :: stop_text
     integer, allocatable, intent(out) :: output(:)
     real(sp), allocatable :: logits(:,:)
-    integer :: i, n_seq2, n_seq_x, next_id
+    
+    integer :: i, n_seq2, n_seq_x, next_id, max_seq_cache
     integer :: input2(size(input)+n_tokens_to_generate)
     logical :: use_kv_cache
     
-    real(sp) :: k_cache(m%n_embd/m%n_head, n_seq+n_tokens_to_generate, m%n_head, m%n_layer)
-    real(sp) :: v_cache(m%n_embd/m%n_head, n_seq+n_tokens_to_generate, m%n_head, m%n_layer)
+    real(sp) :: k_cache(m%n_embd/m%n_head, n_seq + n_tokens_to_generate, m%n_head, m%n_layer)
+    real(sp) :: v_cache(m%n_embd/m%n_head, n_seq + n_tokens_to_generate, m%n_head, m%n_layer)
     character(:), allocatable :: output_txt, last_token
     
+    max_seq_cache = n_seq + n_tokens_to_generate
+    
     if (present(stop_text)) then
-        allocate(character(0) :: output_txt)
-        output_txt = ""
+        output_txt = "" 
     end if
     
     input2(:n_seq) = input
@@ -311,14 +323,16 @@ subroutine generate(output, n_tokens_to_generate, m, &
         
         allocate(logits(m%n_vocab, n_seq_x))
         
-        logits = gpt2(m%n_vocab, m%n_ctx, n_seq2, n_seq_x, m%n_embd, m%n_layer, &
+        call gpt2(m%n_vocab, m%n_ctx, n_seq2, n_seq_x, m%n_embd, m%n_layer, &
                 m%n_head, &
                 input2(:n_seq2), &
                 m%wte, m%wpe, &
                 m%layers, &
-                m%lnf_g, m%lnf_b, use_kv_cache,&
-                k_cache(:, 1:n_seq2, :, :), & 
-                v_cache(:, 1:n_seq2, :, :)) 
+                m%lnf_g, m%lnf_b, use_kv_cache, &
+                max_seq_cache, &
+                k_cache, & 
+                v_cache, &
+                logits) 
                 
         next_id = maxloc(logits(:,n_seq_x), dim=1)-1
         input2(n_seq2+1) = next_id
