@@ -1,0 +1,16 @@
+name: Mac M1 SSH Session
+on: [workflow_dispatch] # Allows you to trigger it manually from the GitHub UI
+
+jobs:
+  build:
+    runs-on: macos-14 # CRITICAL: macos-14 is Apple Silicon (M1). macos-13 is Intel.
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Dependencies
+        run: brew install gcc cmake
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true # Only you can SSH in
