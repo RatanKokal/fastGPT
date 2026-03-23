@@ -1,0 +1,656 @@
+Analysis of sampling gpt2 (pid 26193) every 1 millisecond
+Process:         gpt2 [26193]
+Path:            /Users/USER/*/gpt2
+Load Address:    0x104118000
+Identifier:      gpt2
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  bash [2070]
+
+Date/Time:       2026-03-23 20:47:16.800 +0000
+Launch Time:     2026-03-23 20:47:16.419 +0000
+OS Version:      macOS 14.8.4 (23J319)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+----
+
+Call graph:
+    295 Thread_62045: Main Thread   DispatchQueue_<multiple>
+    + 295 start  (in dyld) + 2476  [0x193e93154]
+    +   295 main  (in gpt2) + 156  [0x104134fbc]
+    +     295 __driver_MOD_gpt2_driver  (in gpt2) + 1240  [0x104132fdc]
+    +       295 __driver_MOD_gpt2_driver2  (in gpt2) + 2812  [0x10412fd80]
+    +         282 __gpt2_mod_MOD_generate  (in gpt2) + 1588  [0x1041258f4]
+    +         ! 145 __gpt2_mod_MOD_gpt2  (in gpt2) + 6808  [0x104123618]
+    +         ! : 59 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 1776  [0x10411a6d0]
+    +         ! : | 59 __linalg_MOD_matmul_2d  (in gpt2) + 316  [0x104134148]
+    +         ! : |   59 acc_sgemm  (in gpt2) + 80  [0x10413305c]
+    +         ! : |     59 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : |       58 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : |       + 58 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda4c4  [0x194c3c4c4]
+    +         ! : |       +   57 dispatch_apply  (in libdispatch.dylib) + 96  [0x19408208c]
+    +         ! : |       +   ! 36 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1212  [0x194081e9c]
+    +         ! : |       +   ! : 25 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 372  [0x194082eec]
+    +         ! : |       +   ! : | 25 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +         ! : |       +   ! : |   25 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +         ! : |       +   ! : |     25 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +         ! : |       +   ! : |       25 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +         ! : |       +   ! : |         25 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+    +         ! : |       +   ! : |           25 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa608  [0x194b6c608]
+    +         ! : |       +   ! : |             7 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13228  [0x194b75228]
+    +         ! : |       +   ! : |             7 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]
+    +         ! : |       +   ! : |             3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13244  [0x194b75244]
+    +         ! : |       +   ! : |             2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13210  [0x194b75210]
+    +         ! : |       +   ! : |             2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13238  [0x194b75238]
+    +         ! : |       +   ! : |             2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13240  [0x194b75240]
+    +         ! : |       +   ! : |             1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13220  [0x194b75220]
+    +         ! : |       +   ! : |             1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1324c  [0x194b7524c]
+    +         ! : |       +   ! : 11 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 204  [0x194082e44]
+    +         ! : |       +   ! :   11 _dispatch_once_wait  (in libdispatch.dylib) + 112  [0x19406ed08]
+    +         ! : |       +   ! :     11 _dlock_wait  (in libdispatch.dylib) + 56  [0x19406edd8]
+    +         ! : |       +   ! :       11 __ulock_wait  (in libsystem_kernel.dylib) + 8  [0x1941dfc0c]
+    +         ! : |       +   ! 19 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1404  [0x194081f5c]
+    +         ! : |       +   ! : 19 _dispatch_root_queue_poke_slow  (in libdispatch.dylib) + 312  [0x19407b2c4]
+    +         ! : |       +   ! :   19 _pthread_workqueue_addthreads  (in libsystem_pthread.dylib) + 44  [0x19421ae70]
+    +         ! : |       +   ! :     19 __workq_kernreturn  (in libsystem_kernel.dylib) + 8  [0x1941dfb04]
+    +         ! : |       +   ! 1 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1172  [0x194081e74]
+    +         ! : |       +   ! : 1 _dispatch_calloc  (in libdispatch.dylib) + 28  [0x19406c660]
+    +         ! : |       +   ! :   1 nanov2_calloc  (in libsystem_malloc.dylib) + 248  [0x19403094c]
+    +         ! : |       +   ! 1 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 28  [0x1940819fc]
+    +         ! : |       +   1 dispatch_apply  (in libdispatch.dylib) + 36  [0x194082050]
+    +         ! : |       +     1 _dispatch_Block_copy  (in libdispatch.dylib) + 32  [0x19406c714]
+    +         ! : |       +       1 _Block_copy  (in libsystem_blocks.dylib) + 0  [0x193f18af0]
+    +         ! : |       1 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x15b6c  [0x194b77b6c]
+    +         ! : 41 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 468  [0x10411a1b4]
+    +         ! : | 40 __linalg_MOD_matmul_2d  (in gpt2) + 316  [0x104134148]
+    +         ! : | + 40 acc_sgemm  (in gpt2) + 80  [0x10413305c]
+    +         ! : | +   40 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : | +     38 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : | +     ! 38 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda4c4  [0x194c3c4c4]
+    +         ! : | +     !   36 dispatch_apply  (in libdispatch.dylib) + 96  [0x19408208c]
+    +         ! : | +     !   : 32 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1212  [0x194081e9c]
+    +         ! : | +     !   : | 21 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 372  [0x194082eec]
+    +         ! : | +     !   : | + 20 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +         ! : | +     !   : | + ! 20 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +         ! : | +     !   : | + !   20 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +         ! : | +     !   : | + !     20 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +         ! : | +     !   : | + !       20 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+    +         ! : | +     !   : | + !         20 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa608  [0x194b6c608]
+    +         ! : | +     !   : | + !           6 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13210  [0x194b75210]
+    +         ! : | +     !   : | + !           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1321c  [0x194b7521c]
+    +         ! : | +     !   : | + !           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13228  [0x194b75228]
+    +         ! : | +     !   : | + !           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13238  [0x194b75238]
+    +         ! : | +     !   : | + !           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13240  [0x194b75240]
+    +         ! : | +     !   : | + !           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13244  [0x194b75244]
+    +         ! : | +     !   : | + !           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]
+    +         ! : | +     !   : | + !           1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1333c  [0x194b7533c]
+    +         ! : | +     !   : | + !           : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13674  [0x194b75674]
+    +         ! : | +     !   : | + !           1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13234  [0x194b75234]
+    +         ! : | +     !   : | + 1 dispatch_once_f  (in libdispatch.dylib) + 92  [0x19406fc38]
+    +         ! : | +     !   : | 9 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 204  [0x194082e44]
+    +         ! : | +     !   : | + 9 _dispatch_once_wait  (in libdispatch.dylib) + 112  [0x19406ed08]
+    +         ! : | +     !   : | +   9 _dlock_wait  (in libdispatch.dylib) + 56  [0x19406edd8]
+    +         ! : | +     !   : | +     9 __ulock_wait  (in libsystem_kernel.dylib) + 8  [0x1941dfc0c]
+    +         ! : | +     !   : | 2 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 240  [0x194082e68]
+    +         ! : | +     !   : |   2 _free  (in libsystem_malloc.dylib) + 60  [0x1940595b0]
+    +         ! : | +     !   : 4 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1404  [0x194081f5c]
+    +         ! : | +     !   :   3 _dispatch_root_queue_poke_slow  (in libdispatch.dylib) + 312  [0x19407b2c4]
+    +         ! : | +     !   :   + 3 _pthread_workqueue_addthreads  (in libsystem_pthread.dylib) + 44  [0x19421ae70]
+    +         ! : | +     !   :   +   3 __workq_kernreturn  (in libsystem_kernel.dylib) + 8  [0x1941dfb04]
+    +         ! : | +     !   :   1 _dispatch_root_queue_poke_slow  (in libdispatch.dylib) + 44  [0x19407b1b8]
+    +         ! : | +     !   1 _Block_release  (in libsystem_blocks.dylib) + 276  [0x193f18f60]
+    +         ! : | +     !   : 1 _nanov2_free  (in libsystem_malloc.dylib) + 548  [0x194050730]
+    +         ! : | +     !   1 dispatch_apply  (in libdispatch.dylib) + 36  [0x194082050]
+    +         ! : | +     !     1 _dispatch_Block_copy  (in libdispatch.dylib) + 32  [0x19406c714]
+    +         ! : | +     !       1 DYLD-STUB$$_Block_copy  (in libdispatch.dylib) + 0  [0x1940a8c70]
+    +         ! : | +     2 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : | 1 __linalg_MOD_matmul_2d  (in gpt2) + 0  [0x10413400c]
+    +         ! : 13 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 1376  [0x10411a540]
+    +         ! : | 13 tanhf  (in libsystem_m.dylib) + 36,192,...  [0x1a0e02624,0x1a0e026c0,...]
+    +         ! : 10 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 1416  [0x10411a568]
+    +         ! : | 10 tanhf  (in libsystem_m.dylib) + 36,0,...  [0x1a0e02624,0x1a0e02600,...]
+    +         ! : 7 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 1464  [0x10411a598]
+    +         ! : | 6 tanhf  (in libsystem_m.dylib) + 36,192,...  [0x1a0e02624,0x1a0e026c0,...]
+    +         ! : | 1 DYLD-STUB$$tanhf  (in gpt2) + 4  [0x104135158]
+    +         ! : 7 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 1504  [0x10411a5c0]
+    +         ! : | 7 tanhf  (in libsystem_m.dylib) + 48,192,...  [0x1a0e02630,0x1a0e026c0,...]
+    +         ! : 5 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 0,1404,...  [0x104119fe0,0x10411a55c,...]
+    +         ! : 1 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 1088  [0x10411a420]
+    +         ! : | 1 szone_malloc_should_clear  (in libsystem_malloc.dylib) + 128  [0x19402fb20]
+    +         ! : |   1 small_malloc_should_clear  (in libsystem_malloc.dylib) + 200  [0x19402fcf4]
+    +         ! : |     1 small_malloc_from_free_list  (in libsystem_malloc.dylib) + 424  [0x194030520]
+    +         ! : 1 __gpt2_mod_MOD_ffn.constprop.0  (in gpt2) + 2396  [0x10411a93c]
+    +         ! : | 1 free_small  (in libsystem_malloc.dylib) + 208  [0x1940323fc]
+    +         ! : 1 free_small  (in libsystem_malloc.dylib) + 880  [0x19403269c]
+    +         ! :   1 small_free_list_add_ptr  (in libsystem_malloc.dylib) + 356  [0x1940346bc]
+    +         ! 110 __gpt2_mod_MOD_gpt2  (in gpt2) + 3740  [0x104122a1c]
+    +         ! : 61 __gpt2_mod_MOD_mha  (in gpt2) + 1116  [0x10411bf3c]
+    +         ! : | 61 __linalg_MOD_matmul_2d  (in gpt2) + 316  [0x104134148]
+    +         ! : |   61 acc_sgemm  (in gpt2) + 80  [0x10413305c]
+    +         ! : |     61 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : |       61 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : |         59 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda4c4  [0x194c3c4c4]
+    +         ! : |         + 59 dispatch_apply  (in libdispatch.dylib) + 96  [0x19408208c]
+    +         ! : |         +   42 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1212  [0x194081e9c]
+    +         ! : |         +   ! 42 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 372  [0x194082eec]
+    +         ! : |         +   !   42 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +         ! : |         +   !     42 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +         ! : |         +   !       42 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +         ! : |         +   !         42 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +         ! : |         +   !           42 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+    +         ! : |         +   !             42 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa628  [0x194b6c628]
+    +         ! : |         +   !               12 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]
+    +         ! : |         +   !               6 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13590  [0x194b75590]
+    +         ! : |         +   !               : 3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x136a0  [0x194b756a0]
+    +         ! : |         +   !               : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1368c  [0x194b7568c]
+    +         ! : |         +   !               : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13694  [0x194b75694]
+    +         ! : |         +   !               : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x136a4  [0x194b756a4]
+    +         ! : |         +   !               5 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]
+    +         ! : |         +   !               4 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134ac  [0x194b754ac]
+    +         ! : |         +   !               3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134a8  [0x194b754a8]
+    +         ! : |         +   !               3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134b8  [0x194b754b8]
+    +         ! : |         +   !               3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134c8  [0x194b754c8]
+    +         ! : |         +   !               2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13484  [0x194b75484]
+    +         ! : |         +   !               2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d0  [0x194b754d0]
+    +         ! : |         +   !               1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134c4  [0x194b754c4]
+    +         ! : |         +   !               1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134cc  [0x194b754cc]
+    +         ! : |         +   16 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1404  [0x194081f5c]
+    +         ! : |         +   ! 16 _dispatch_root_queue_poke_slow  (in libdispatch.dylib) + 312  [0x19407b2c4]
+    +         ! : |         +   !   16 _pthread_workqueue_addthreads  (in libsystem_pthread.dylib) + 44  [0x19421ae70]
+    +         ! : |         +   !     16 __workq_kernreturn  (in libsystem_kernel.dylib) + 8  [0x1941dfb04]
+    +         ! : |         +   1 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 188  [0x194081a9c]
+    +         ! : |         2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda150  [0x194c3c150]
+    +         ! : |           2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1888  [0x194b63888]
+    +         ! : 27 __gpt2_mod_MOD_mha  (in gpt2) + 5604  [0x10411d0c4]
+    +         ! : | 27 __linalg_MOD_matmul_2d  (in gpt2) + 316  [0x104134148]
+    +         ! : |   27 acc_sgemm  (in gpt2) + 80  [0x10413305c]
+    +         ! : |     27 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : |       27 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : |         27 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda4c4  [0x194c3c4c4]
+    +         ! : |           25 dispatch_apply  (in libdispatch.dylib) + 96  [0x19408208c]
+    +         ! : |           + 19 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1212  [0x194081e9c]
+    +         ! : |           + ! 14 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 372  [0x194082eec]
+    +         ! : |           + ! : 14 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +         ! : |           + ! :   14 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +         ! : |           + ! :     14 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +         ! : |           + ! :       14 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +         ! : |           + ! :         14 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+    +         ! : |           + ! :           14 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa628  [0x194b6c628]
+    +         ! : |           + ! :             5 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]
+    +         ! : |           + ! :             3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134b8  [0x194b754b8]
+    +         ! : |           + ! :             2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13590  [0x194b75590]
+    +         ! : |           + ! :             | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13690  [0x194b75690]
+    +         ! : |           + ! :             | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x136a0  [0x194b756a0]
+    +         ! : |           + ! :             1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1348c  [0x194b7548c]
+    +         ! : |           + ! :             1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]
+    +         ! : |           + ! :             1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134a4  [0x194b754a4]
+    +         ! : |           + ! :             1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d0  [0x194b754d0]
+    +         ! : |           + ! 4 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 204  [0x194082e44]
+    +         ! : |           + ! : 4 _dispatch_once_wait  (in libdispatch.dylib) + 112  [0x19406ed08]
+    +         ! : |           + ! :   4 _dlock_wait  (in libdispatch.dylib) + 56  [0x19406edd8]
+    +         ! : |           + ! :     4 __ulock_wait  (in libsystem_kernel.dylib) + 8  [0x1941dfc0c]
+    +         ! : |           + ! 1 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 204  [0x194082e44]
+    +         ! : |           + 6 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1404  [0x194081f5c]
+    +         ! : |           +   6 _dispatch_root_queue_poke_slow  (in libdispatch.dylib) + 312  [0x19407b2c4]
+    +         ! : |           +     6 _pthread_workqueue_addthreads  (in libsystem_pthread.dylib) + 44  [0x19421ae70]
+    +         ! : |           +       6 __workq_kernreturn  (in libsystem_kernel.dylib) + 8  [0x1941dfb04]
+    +         ! : |           1 dispatch_apply  (in libdispatch.dylib) + 36  [0x194082050]
+    +         ! : |           + 1 _dispatch_Block_copy  (in libdispatch.dylib) + 32  [0x19406c714]
+    +         ! : |           +   1 _Block_copy  (in libsystem_blocks.dylib) + 376  [0x193f18c68]
+    +         ! : |           +     1 _call_copy_helpers_excp  (in libsystem_blocks.dylib) + 0  [0x193f190c8]
+    +         ! : |           1 dispatch_apply  (in libdispatch.dylib) + 0  [0x19408202c]
+    +         ! : 6 __gpt2_mod_MOD_mha  (in gpt2) + 4736  [0x10411cd60]
+    +         ! : | 4 __gpt2_mod_MOD_attention  (in gpt2) + 332  [0x10411b010]
+    +         ! : | + 4 __linalg_MOD_matmul_2d_t  (in gpt2) + 312  [0x1041331f8]
+    +         ! : | +   4 acc_sgemm_t  (in gpt2) + 76  [0x1041330b4]
+    +         ! : | +     4 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : | +       4 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : | +         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda150  [0x194c3c150]
+    +         ! : | +         ! 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x18a4  [0x194b638a4]
+    +         ! : | +         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc48  [0x194b6ec48]
+    +         ! : | +         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xce8c  [0x194b6ee8c]
+    +         ! : | +         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x350ce0  [0x194eb2ce0]
+    +         ! : | 2 __gpt2_mod_MOD_attention  (in gpt2) + 0,880  [0x10411aec4,0x10411b234]
+    +         ! : 5 __gpt2_mod_MOD_mha  (in gpt2) + 3180  [0x10411c74c]
+    +         ! : | 3 __gpt2_mod_MOD_attention  (in gpt2) + 2800  [0x10411b9b4]
+    +         ! : | + 3 __linalg_MOD_matmul_2d  (in gpt2) + 316  [0x104134148]
+    +         ! : | +   3 acc_sgemm  (in gpt2) + 80  [0x10413305c]
+    +         ! : | +     3 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : | +       3 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! : | +         2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xb078  [0x194b6d078]
+    +         ! : | +         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xb084  [0x194b6d084]
+    +         ! : | 1 __gpt2_mod_MOD_attention  (in gpt2) + 332  [0x10411b010]
+    +         ! : | + 1 __linalg_MOD_matmul_2d_t  (in gpt2) + 312  [0x1041331f8]
+    +         ! : | +   1 acc_sgemm_t  (in gpt2) + 76  [0x1041330b4]
+    +         ! : | +     1 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! : | +       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x15f18  [0x194b77f18]
+    +         ! : | 1 __gpt2_mod_MOD_attention  (in gpt2) + 1016  [0x10411b2bc]
+    +         ! : 4 __gpt2_mod_MOD_mha  (in gpt2) + 3020,2176,...  [0x10411c6ac,0x10411c360,...]
+    +         ! : 2 __gpt2_mod_MOD_mha  (in gpt2) + 2988  [0x10411c68c]
+    +         ! : | 2 _platform_memmove  (in libsystem_platform.dylib) + 24,204  [0x19424f1b8,0x19424f26c]
+    +         ! : 2 __gpt2_mod_MOD_mha  (in gpt2) + 3020  [0x10411c6ac]
+    +         ! : | 2 DYLD-STUB$$memcpy  (in gpt2) + 0  [0x104135118]
+    +         ! : 1 __gpt2_mod_MOD_mha  (in gpt2) + 328  [0x10411bc28]
+    +         ! : | 1 szone_malloc_should_clear  (in libsystem_malloc.dylib) + 128  [0x19402fb20]
+    +         ! : |   1 small_malloc_should_clear  (in libsystem_malloc.dylib) + 200  [0x19402fcf4]
+    +         ! : |     1 small_malloc_from_free_list  (in libsystem_malloc.dylib) + 0  [0x194030378]
+    +         ! : 1 __gpt2_mod_MOD_mha  (in gpt2) + 2964  [0x10411c674]
+    +         ! : | 1 _platform_memmove  (in libsystem_platform.dylib) + 208  [0x19424f270]
+    +         ! : 1 __gpt2_mod_MOD_mha  (in gpt2) + 6700  [0x10411d50c]
+    +         ! :   1 _nanov2_free  (in libsystem_malloc.dylib) + 520  [0x194050714]
+    +         ! :     1 _platform_memset  (in libsystem_platform.dylib) + 140  [0x19424ef5c]
+    +         ! 21 __gpt2_mod_MOD_gpt2  (in gpt2) + 11028  [0x104124694]
+    +         ! : 21 __linalg_MOD_matmul_2d_t  (in gpt2) + 312  [0x1041331f8]
+    +         ! :   21 acc_sgemm_t  (in gpt2) + 76  [0x1041330b4]
+    +         ! :     21 cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+    +         ! :       21 cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+    +         ! :         21 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda4c4  [0x194c3c4c4]
+    +         ! :           21 dispatch_apply  (in libdispatch.dylib) + 96  [0x19408208c]
+    +         ! :             21 _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1212  [0x194081e9c]
+    +         ! :               20 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 372  [0x194082eec]
+    +         ! :               | 20 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +         ! :               |   20 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +         ! :               |     20 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +         ! :               |       20 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +         ! :               |         4 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb8  [0x194b6ecb8]
+    +         ! :               |         2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xce9c  [0x194b6ee9c]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc518  [0x194b6e518]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc56c  [0x194b6e56c]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc580  [0x194b6e580]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc98  [0x194b6ec98]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcca0  [0x194b6eca0]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb0  [0x194b6ecb0]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb4  [0x194b6ecb4]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccc4  [0x194b6ecc4]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xce84  [0x194b6ee84]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xce98  [0x194b6ee98]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd080  [0x194b6f080]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd19c  [0x194b6f19c]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd9fd0  [0x194c3bfd0]
+    +         ! :               |         1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd9fd8  [0x194c3bfd8]
+    +         ! :               1 _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 204  [0x194082e44]
+    +         ! :                 1 _dispatch_once_wait  (in libdispatch.dylib) + 112  [0x19406ed08]
+    +         ! :                   1 _dlock_wait  (in libdispatch.dylib) + 56  [0x19406edd8]
+    +         ! :                     1 __ulock_wait  (in libsystem_kernel.dylib) + 8  [0x1941dfc0c]
+    +         ! 3 __gpt2_mod_MOD_gpt2  (in gpt2) + 6292,11028,...  [0x104123414,0x104124694,...]
+    +         ! 1 __gpt2_mod_MOD_gpt2  (in gpt2) + 1452  [0x10412212c]
+    +         ! : 1 szone_malloc_should_clear  (in libsystem_malloc.dylib) + 128  [0x19402fb20]
+    +         ! :   1 small_malloc_should_clear  (in libsystem_malloc.dylib) + 0  [0x19402fc2c]
+    +         ! 1 __gpt2_mod_MOD_gpt2  (in gpt2) + 4392  [0x104122ca8]
+    +         ! : 1 szone_malloc_should_clear  (in libsystem_malloc.dylib) + 128  [0x19402fb20]
+    +         ! :   1 small_malloc_should_clear  (in libsystem_malloc.dylib) + 0  [0x19402fc2c]
+    +         ! 1 __gpt2_mod_MOD_gpt2  (in gpt2) + 6748  [0x1041235dc]
+    +         !   1 szone_malloc_should_clear  (in libsystem_malloc.dylib) + 128  [0x19402fb20]
+    +         !     1 small_malloc_should_clear  (in libsystem_malloc.dylib) + 200  [0x19402fcf4]
+    +         !       1 small_malloc_from_free_list  (in libsystem_malloc.dylib) + 152  [0x194030410]
+    +         !         1 small_free_list_remove_ptr  (in libsystem_malloc.dylib) + 164  [0x194034bf0]
+    +         3 __gpt2_mod_MOD_generate  (in gpt2) + 2240  [0x104125b80]
+    +         ! 3 free_medium  (in libsystem_malloc.dylib) + 628  [0x1940365fc]
+    +         !   2 mvm_madvise_free_plat  (in libsystem_malloc.dylib) + 108  [0x194048834]
+    +         !   : 2 madvise  (in libsystem_kernel.dylib) + 8  [0x1941e0ad8]
+    +         !   1 mvm_madvise_free  (in libsystem_malloc.dylib) + 0  [0x19403852c]
+    +         2 __gpt2_mod_MOD_generate  (in gpt2) + 2016  [0x104125aa0]
+    +         ! 2 _platform_memmove  (in libsystem_platform.dylib) + 168,204  [0x19424f248,0x19424f26c]
+    +         2 __gpt2_mod_MOD_generate  (in gpt2) + 2052  [0x104125ac4]
+    +         ! 2 _platform_memmove  (in libsystem_platform.dylib) + 200  [0x19424f268]
+    +         2 __gpt2_mod_MOD_generate  (in gpt2) + 2144  [0x104125b20]
+    +         ! 2 _platform_memmove  (in libsystem_platform.dylib) + 180,196  [0x19424f254,0x19424f264]
+    +         1 __gpt2_mod_MOD_generate  (in gpt2) + 1020  [0x1041256bc]
+    +         ! 1 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x19424f254]
+    +         1 __gpt2_mod_MOD_generate  (in gpt2) + 2036  [0x104125ab4]
+    +         ! 1 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x19424f254]
+    +         1 __gpt2_mod_MOD_generate  (in gpt2) + 2072  [0x104125ad8]
+    +         ! 1 _platform_memmove  (in libsystem_platform.dylib) + 196  [0x19424f264]
+    +         1 __gpt2_mod_MOD_generate  (in gpt2) + 2108  [0x104125afc]
+    +           1 _platform_memmove  (in libsystem_platform.dylib) + 180  [0x19424f254]
+    268 Thread_62076
+    + 203 start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+    + ! 203 _pthread_wqthread  (in libsystem_pthread.dylib) + 364  [0x19421b000]
+    + !   202 __workq_kernreturn  (in libsystem_kernel.dylib) + 8  [0x1941dfb04]
+    + !   1 DYLD-STUB$$__workq_kernreturn  (in libsystem_pthread.dylib) + 0  [0x194223a90]
+    + 65 start_wqthread  (in libsystem_pthread.dylib) + 0  [0x194219d10]
+    266 Thread_62075
+    + 189 start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+    + ! 189 _pthread_wqthread  (in libsystem_pthread.dylib) + 364  [0x19421b000]
+    + !   189 __workq_kernreturn  (in libsystem_kernel.dylib) + 8  [0x1941dfb04]
+    + 77 start_wqthread  (in libsystem_pthread.dylib) + 0  [0x194219d10]
+    243 Thread_62077
+    + 162 start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+    + ! 162 _pthread_wqthread  (in libsystem_pthread.dylib) + 364  [0x19421b000]
+    + !   162 __workq_kernreturn  (in libsystem_kernel.dylib) + 8,0  [0x1941dfb04,0x1941dfafc]
+    + 81 start_wqthread  (in libsystem_pthread.dylib) + 0  [0x194219d10]
+    52 Thread_62077   DispatchQueue_10: com.apple.root.utility-qos  (concurrent)
+    + 52 start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+    +   52 _pthread_wqthread  (in libsystem_pthread.dylib) + 228  [0x19421af78]
+    +     52 _dispatch_worker_thread2  (in libdispatch.dylib) + 156  [0x1940806b8]
+    +       51 _dispatch_root_queue_drain  (in libdispatch.dylib) + 864  [0x194080080]
+    +       ! 51 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +       !   51 _dispatch_apply_invoke  (in libdispatch.dylib) + 252  [0x1940818a4]
+    +       !     47 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +       !     : 47 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +       !     :   47 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +       !     :     47 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +       !     :       34 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+    +       !     :       | 18 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa608  [0x194b6c608]
+    +       !     :       | + 5 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13228  [0x194b75228]
+    +       !     :       | + 3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1333c  [0x194b7533c]
+    +       !     :       | + ! 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13674  [0x194b75674]
+    +       !     :       | + ! 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13684  [0x194b75684]
+    +       !     :       | + ! 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x136a0  [0x194b756a0]
+    +       !     :       | + 3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13210  [0x194b75210]
+    +       !     :       | + 2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13244  [0x194b75244]
+    +       !     :       | + 2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]
+    +       !     :       | + 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13218  [0x194b75218]
+    +       !     :       | + 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1321c  [0x194b7521c]
+    +       !     :       | + 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13234  [0x194b75234]
+    +       !     :       | 16 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa628  [0x194b6c628]
+    +       !     :       |   5 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]
+    +       !     :       |   3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134b8  [0x194b754b8]
+    +       !     :       |   2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13484  [0x194b75484]
+    +       !     :       |   1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13590  [0x194b75590]
+    +       !     :       |   ! 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x136a0  [0x194b756a0]
+    +       !     :       |   1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]
+    +       !     :       |   1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134ac  [0x194b754ac]
+    +       !     :       |   1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d0  [0x194b754d0]
+    +       !     :       |   1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d8  [0x194b754d8]
+    +       !     :       |   1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13540  [0x194b75540]
+    +       !     :       3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc98  [0x194b6ec98]
+    +       !     :       3 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb8  [0x194b6ecb8]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc554  [0x194b6e554]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc90  [0x194b6ec90]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcca8  [0x194b6eca8]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccbc  [0x194b6ecbc]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcda8  [0x194b6eda8]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd9fd0  [0x194c3bfd0]
+    +       !     :       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd9fd8  [0x194c3bfd8]
+    +       !     4 _dlock_wake  (in libdispatch.dylib) + 32  [0x19406ee60]
+    +       !       4 __ulock_wake  (in libsystem_kernel.dylib) + 8,0  [0x1941dfce0,0x1941dfcd8]
+    +       1 _dispatch_root_queue_drain  (in libdispatch.dylib) + 224  [0x19407fe00]
+    +         1 _dispatch_root_queue_poke  (in libdispatch.dylib) + 0  [0x19407b138]
+    29 Thread_62075   DispatchQueue_10: com.apple.root.utility-qos  (concurrent)
+    + 29 start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+    +   29 _pthread_wqthread  (in libsystem_pthread.dylib) + 228  [0x19421af78]
+    +     29 _dispatch_worker_thread2  (in libdispatch.dylib) + 156  [0x1940806b8]
+    +       29 _dispatch_root_queue_drain  (in libdispatch.dylib) + 864  [0x194080080]
+    +         29 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +           29 _dispatch_apply_invoke  (in libdispatch.dylib) + 252  [0x1940818a4]
+    +             29 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+    +               29 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+    +                 29 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+    +                   29 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+    +                     18 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+    +                     ! 11 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa628  [0x194b6c628]
+    +                     ! : 5 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]
+    +                     ! : 2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134a4  [0x194b754a4]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134ac  [0x194b754ac]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134cc  [0x194b754cc]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d0  [0x194b754d0]
+    +                     ! 6 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa608  [0x194b6c608]
+    +                     ! : 2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13228  [0x194b75228]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1321c  [0x194b7521c]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13264  [0x194b75264]
+    +                     ! : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1331c  [0x194b7531c]
+    +                     ! 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa25c  [0x194b6c25c]
+    +                     !   1 ___chkstk_darwin  (in libsystem_pthread.dylib) + 0  [0x194219d28]
+    +                     2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc54c  [0x194b6e54c]
+    +                     2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc78  [0x194b6ec78]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc56c  [0x194b6e56c]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcad0  [0x194b6ead0]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc80  [0x194b6ec80]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb8  [0x194b6ecb8]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcccc  [0x194b6eccc]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd198  [0x194b6f198]
+    +                     1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xd19c  [0x194b6f19c]
+    27 Thread_62076   DispatchQueue_10: com.apple.root.utility-qos  (concurrent)
+      27 start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+        27 _pthread_wqthread  (in libsystem_pthread.dylib) + 228  [0x19421af78]
+          27 _dispatch_worker_thread2  (in libdispatch.dylib) + 156  [0x1940806b8]
+            27 _dispatch_root_queue_drain  (in libdispatch.dylib) + 864  [0x194080080]
+              27 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+                27 _dispatch_apply_invoke  (in libdispatch.dylib) + 252  [0x1940818a4]
+                  25 _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+                  ! 25 _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+                  !   25 _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+                  !     25 _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+                  !       13 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+                  !       : 8 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa628  [0x194b6c628]
+                  !       : | 2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134b8  [0x194b754b8]
+                  !       : | 2 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13590  [0x194b75590]
+                  !       : | + 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13690  [0x194b75690]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1348c  [0x194b7548c]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134b4  [0x194b754b4]
+                  !       : 4 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa608  [0x194b6c608]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13210  [0x194b75210]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13240  [0x194b75240]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13254  [0x194b75254]
+                  !       : | 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]
+                  !       : 1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa5c4  [0x194b6c5c4]
+                  !       :   1 __bzero  (in libsystem_platform.dylib) + 0  [0x19424ee70]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc534  [0x194b6e534]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc55c  [0x194b6e55c]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc714  [0x194b6e714]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xc750  [0x194b6e750]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xca04  [0x194b6ea04]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc64  [0x194b6ec64]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc78  [0x194b6ec78]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc80  [0x194b6ec80]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xcc90  [0x194b6ec90]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb8  [0x194b6ecb8]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xce80  [0x194b6ee80]
+                  !       1 ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xce9c  [0x194b6ee9c]
+                  2 _dlock_wake  (in libdispatch.dylib) + 32  [0x19406ee60]
+                    2 __ulock_wake  (in libsystem_kernel.dylib) + 8  [0x1941dfce0]
+
+Total number in stack (recursive counted multiple, when >=5):
+        11       _dispatch_client_callout  (in libdispatch.dylib) + 20  [0x19406e3e8]
+        9       _platform_memmove  (in libsystem_platform.dylib) + 0  [0x19424f1a0]
+        9       cblas_sgemm  (in libBLAS.dylib) + 100  [0x194eb1440]
+        8       _dispatch_apply_invoke3  (in libdispatch.dylib) + 336  [0x194082850]
+        8       _dispatch_client_callout2  (in libdispatch.dylib) + 20  [0x19406e428]
+        8       _dispatch_once_callout  (in libdispatch.dylib) + 32  [0x19406fc68]
+        7       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda8b8  [0x194c3c8b8]
+        7       __workq_kernreturn  (in libsystem_kernel.dylib) + 0  [0x1941dfafc]
+        7       cblas_sgemv$NEWLAPACK  (in libBLAS.dylib) + 88  [0x194cbfc74]
+        6       start_wqthread  (in libsystem_pthread.dylib) + 8  [0x194219d18]
+        5       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]
+        5       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]
+        5       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]
+        5       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa608  [0x194b6c608]
+        5       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xa628  [0x194b6c628]
+        5       ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xda4c4  [0x194c3c4c4]
+        5       __linalg_MOD_matmul_2d  (in gpt2) + 316  [0x104134148]
+        5       _dispatch_apply_invoke_and_wait  (in libdispatch.dylib) + 372  [0x194082eec]
+        5       _dispatch_apply_with_attr_f  (in libdispatch.dylib) + 1212  [0x194081e9c]
+        5       acc_sgemm  (in gpt2) + 80  [0x10413305c]
+        5       dispatch_apply  (in libdispatch.dylib) + 96  [0x19408208c]
+        5       szone_malloc_should_clear  (in libsystem_malloc.dylib) + 128  [0x19402fb20]
+
+Sort by top of stack, same collapsed (when >= 5):
+        __workq_kernreturn  (in libsystem_kernel.dylib)        597
+        start_wqthread  (in libsystem_pthread.dylib)        223
+        tanhf  (in libsystem_m.dylib)        36
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d4  [0x194b754d4]        29
+        __ulock_wait  (in libsystem_kernel.dylib)        25
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13228  [0x194b75228]        16
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13260  [0x194b75260]        13
+        _platform_memmove  (in libsystem_platform.dylib)        13
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13210  [0x194b75210]        12
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134b8  [0x194b754b8]        11
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x1349c  [0x194b7549c]        10
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0xccb8  [0x194b6ecb8]        9
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13244  [0x194b75244]        7
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134ac  [0x194b754ac]        6
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x136a0  [0x194b756a0]        6
+        __ulock_wake  (in libsystem_kernel.dylib)        6
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x13240  [0x194b75240]        5
+        ???  (in libBLAS.dylib)  load address 0x194b62000 + 0x134d0  [0x194b754d0]        5
+        __gpt2_mod_MOD_ffn.constprop.0  (in gpt2)        5
+
+Binary Images:
+       0x104118000 -        0x104137fe7 +gpt2 (0) <E1B2253C-9986-32B3-9A26-270102AD41F9> /Users/*/gpt2
+       0x1045c4000 -        0x1045dbff7 +libgcc_s.1.1.dylib (0) <EE1E4A5E-4DA2-32A6-A5FB-3B38FF04E5D1> /opt/homebrew/*/libgcc_s.1.1.dylib
+       0x1045f8000 -        0x10463bfe7 +libgomp.1.dylib (0) <8AF5FE95-8FD3-3217-8A22-C2B21626B966> /opt/homebrew/*/libgomp.1.dylib
+       0x104664000 -        0x1046a3fe7 +libquadmath.0.dylib (0) <1950051B-B522-3923-88A7-75B7B1721893> /opt/homebrew/*/libquadmath.0.dylib
+       0x104884000 -        0x104a13fef +libgfortran.5.dylib (0) <53578048-A668-36C8-9656-9374E2D5CA0D> /opt/homebrew/*/libgfortran.5.dylib
+       0x193e3c000 -        0x193e8ce0b  libobjc.A.dylib (912.7) <25BD8A7B-882F-34FA-9C27-F9881D55FD5A> /usr/lib/libobjc.A.dylib
+       0x193e8d000 -        0x193f16733  dyld (1.0.0 - 1165.4) <DA78CD86-A87D-383D-8D04-5466D01EEBDA> /usr/lib/dyld
+       0x193f17000 -        0x193f1bff8  libsystem_blocks.dylib (90) <211B9835-0DDF-3993-820A-E262022D2CA2> /usr/lib/system/libsystem_blocks.dylib
+       0x193f1c000 -        0x193f66fff  libxpc.dylib (2748.140.10.707.1) <AF7D380E-B963-3D08-AEFC-D6FF2BA04603> /usr/lib/system/libxpc.dylib
+       0x193f67000 -        0x193f82fff  libsystem_trace.dylib (1510.140.4.700.1) <D7208876-BCC7-3ED3-BE89-82B48E2AF2B9> /usr/lib/system/libsystem_trace.dylib
+       0x193f83000 -        0x19402cfcf  libcorecrypto.dylib (1638.140.6) <AD089A89-3D2C-3BBB-A78C-2F5178C7BBB3> /usr/lib/system/libcorecrypto.dylib
+       0x19402d000 -        0x194069ff7  libsystem_malloc.dylib (521.120.7) <5C7EA307-986B-357E-A322-A919CACBF84D> /usr/lib/system/libsystem_malloc.dylib
+       0x19406a000 -        0x1940b1fff  libdispatch.dylib (1477.100.9) <3C4E83E4-5AEA-33C4-95CF-082E8F5C64FC> /usr/lib/system/libdispatch.dylib
+       0x1940b2000 -        0x1940b4fff  libsystem_featureflags.dylib (86) <090E55ED-6B88-3CE3-9CFC-50CE3DB0B9AD> /usr/lib/system/libsystem_featureflags.dylib
+       0x1940b5000 -        0x194133ffb  libsystem_c.dylib (1592.100.35.700.2) <348023BD-AC90-3C47-B3E3-B46DA00F03D3> /usr/lib/system/libsystem_c.dylib
+       0x194134000 -        0x1941c0ff7  libc++.1.dylib (1700.255.5) <96F1A5FA-A17A-37D2-88E7-B623FCC10972> /usr/lib/libc++.1.dylib
+       0x1941c1000 -        0x1941dcffb  libc++abi.dylib (1700.255.5) <9363A602-6997-30B9-80B8-4CC506D43DD5> /usr/lib/libc++abi.dylib
+       0x1941dd000 -        0x194217ffb  libsystem_kernel.dylib (10063.141.1.710.3) <FB091959-3D4B-3F5C-805C-1E91C3190731> /usr/lib/system/libsystem_kernel.dylib
+       0x194218000 -        0x194224fff  libsystem_pthread.dylib (519.120.4.701.1) <9A85D226-4047-362C-B93F-C5B6B64CD711> /usr/lib/system/libsystem_pthread.dylib
+       0x194225000 -        0x19424aff7  libdyld.dylib (1165.4) <2AF09AF2-6391-36E6-96BA-1A3D39885124> /usr/lib/system/libdyld.dylib
+       0x19424b000 -        0x194252fe7  libsystem_platform.dylib (316.100.10) <C61A09AF-F925-33A9-8A45-B20EA2B46A2B> /usr/lib/system/libsystem_platform.dylib
+       0x194253000 -        0x19427fff3  libsystem_info.dylib (583.0.1.702.2) <044A3193-6500-35BB-8E1D-90E989900D48> /usr/lib/system/libsystem_info.dylib
+       0x194280000 -        0x194758fff  com.apple.CoreFoundation (6.9 - 2602.0.902.1.404) <9F2F270A-6B00-332A-B9A8-A38A0A422E2D> /System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation
+       0x194759000 -        0x194a15fff  com.apple.LaunchServices (1141.1 - 1141.1) <A4E65253-D44C-352D-89A5-BCC75C96F93B> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/LaunchServices
+       0x194b62000 -        0x194efdfef  libBLAS.dylib (1447.120.2) <46B1944B-B530-3DF4-8D6D-E893CF090A0D> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
+       0x194efe000 -        0x194fefff7  com.apple.Lexicon-framework (1.0 - 134.9) <D1E41BFB-8568-3644-B793-7380C78F1963> /System/Library/PrivateFrameworks/Lexicon.framework/Versions/A/Lexicon
+       0x194ff0000 -        0x195056fff  libSparse.dylib (125) <B56D804D-33D8-3C11-B78E-445D44CBF316> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libSparse.dylib
+       0x195057000 -        0x1950eaff7  com.apple.SystemConfiguration (1.21 - 1.21) <61BF1B96-5789-32BE-A4E6-47EBF629A6BD> /System/Library/Frameworks/SystemConfiguration.framework/Versions/A/SystemConfiguration
+       0x1950eb000 -        0x19511fff3  libCRFSuite.dylib (52) <DA891B7D-E246-36E7-A07A-174B351D8A3A> /usr/lib/libCRFSuite.dylib
+       0x1953d7000 -        0x196034fff  com.apple.Foundation (6.9 - 2602.0.902.1.404) <EAEA9BA6-29A7-3374-8ED0-88A80693A901> /System/Library/Frameworks/Foundation.framework/Versions/C/Foundation
+       0x196035000 -        0x19621afff  com.apple.LanguageModeling (1.0 - 366.9) <1000104B-1ED3-3079-88F4-04FE5CE87D0F> /System/Library/PrivateFrameworks/LanguageModeling.framework/Versions/A/LanguageModeling
+       0x196fad000 -        0x19737cfff  com.apple.security (7.0 - 61123.141.1.706.1) <0CA0233A-D64B-3327-B61C-F1C243CC0A68> /System/Library/Frameworks/Security.framework/Versions/A/Security
+       0x19737d000 -        0x197643fff  libicucore.A.dylib (74000.404.203) <0248B1DA-FBB5-3FC2-B75C-D2C93A1DD220> /usr/lib/libicucore.A.dylib
+       0x197644000 -        0x19764eff3  libsystem_darwin.dylib (1592.100.35.700.2) <394F4350-CEC7-37A9-BF08-22DBC89F9239> /usr/lib/system/libsystem_darwin.dylib
+       0x19764f000 -        0x197954fff  com.apple.CoreServices.CarbonCore (1333 - 1333) <261BC76B-32D4-3E2D-8D2B-F750E25E66E8> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/CarbonCore.framework/Versions/A/CarbonCore
+       0x197955000 -        0x197995fff  com.apple.CoreServicesInternal (505 - 505) <97097382-A267-33ED-A7D5-C619B168DECB> /System/Library/PrivateFrameworks/CoreServicesInternal.framework/Versions/A/CoreServicesInternal
+       0x197996000 -        0x1979d6fff  com.apple.CSStore (1141.1 - 1141.1) <82AE88CE-A9AC-3738-9CFE-CECC3808632D> /System/Library/PrivateFrameworks/CoreServicesStore.framework/Versions/A/CoreServicesStore
+       0x1979d7000 -        0x197ab9fff  com.apple.framework.IOKit (2.0.2 - 100076.120.9.701.1) <855E376A-CA66-3357-8436-7A346F239B54> /System/Library/Frameworks/IOKit.framework/Versions/A/IOKit
+       0x197aba000 -        0x197acaff7  libsystem_notify.dylib (317.120.2.701.1) <EA47D859-08F9-3504-BB21-E9CE4DD78D29> /usr/lib/system/libsystem_notify.dylib
+       0x19953b000 -        0x19953bfff  libnetwork.dylib (3762.140.6.701.1) <75BD3FCD-43F9-3AAB-8658-121C49AEDFDC> /usr/lib/libnetwork.dylib
+       0x19953c000 -        0x19990cfff  com.apple.CFNetwork (1.0 - 1498.700.2.1.2) <ACDE2BE7-BC55-3921-872C-C643058F83AA> /System/Library/Frameworks/CFNetwork.framework/Versions/A/CFNetwork
+       0x19990d000 -        0x199927fff  libsystem_networkextension.dylib (1838.140.5.700.1) <66583437-D43A-37F3-AE5F-B6E85B4F1D14> /usr/lib/system/libsystem_networkextension.dylib
+       0x199928000 -        0x199929fff  libenergytrace.dylib (23) <72E0F441-19EE-3F3C-87C0-3F993A803A01> /usr/lib/libenergytrace.dylib
+       0x19992a000 -        0x19999ffff  libMobileGestalt.dylib (1332.120.2) <DB53CD78-1118-3BA5-9BE9-405600D3EA7E> /usr/lib/libMobileGestalt.dylib
+       0x1999a0000 -        0x1999b7ff7  libsystem_asl.dylib (398) <95297D01-3979-3279-8E1C-BD545F5F49F5> /usr/lib/system/libsystem_asl.dylib
+       0x1999b8000 -        0x1999d8ff0  com.apple.TCC (1.0 - 1) <F0EC82A8-470E-3E16-BD43-1D488F78056F> /System/Library/PrivateFrameworks/TCC.framework/Versions/A/TCC
+       0x19af6f000 -        0x19af88fff  com.apple.ProtocolBuffer (1 - 300.26.4.18.2) <CF518DAF-7ABC-3E8B-B6B7-9CCB7740977D> /System/Library/PrivateFrameworks/ProtocolBuffer.framework/Versions/A/ProtocolBuffer
+       0x19af89000 -        0x19b13bff3  libsqlite3.dylib (351.6) <9A46934B-735A-3071-AEEC-6A349EE6140D> /usr/lib/libsqlite3.dylib
+       0x19b315000 -        0x19b388ff7  com.apple.AE (944 - 944) <407B45AC-03C6-30BA-AC36-00ACE7D1103E> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/AE.framework/Versions/A/AE
+       0x19b389000 -        0x19b393fff  libdns_services.dylib (2200.140.11.702.1) <CF5ED7E1-57EE-394B-8B11-F51503522059> /usr/lib/libdns_services.dylib
+       0x19b394000 -        0x19b39cff3  libsystem_symptoms.dylib (1871.140.6) <D2A73397-AABC-3891-B1FC-0B5BEF5AF9A2> /usr/lib/system/libsystem_symptoms.dylib
+       0x19b39d000 -        0x19bfeafff  com.apple.Network (1.0 - 1) <87E57C99-CFF8-37C7-85CE-E39C0287FD36> /System/Library/Frameworks/Network.framework/Versions/A/Network
+       0x19bfeb000 -        0x19c019fff  com.apple.analyticsd (1.0 - 1) <2181B24F-273B-3158-B87C-A81AA5C3A8D2> /System/Library/PrivateFrameworks/CoreAnalytics.framework/Versions/A/CoreAnalytics
+       0x19c01a000 -        0x19c01bfff  libDiagnosticMessagesClient.dylib (113) <D08E0F57-D0E1-348F-82C0-C84FD65C6559> /usr/lib/libDiagnosticMessagesClient.dylib
+       0x19c01c000 -        0x19c062fff  com.apple.spotlight.metadata.utilities (1.0 - 2274.38.5.4) <2D6833F6-D216-345B-A527-5C68FBE2EE8C> /System/Library/PrivateFrameworks/MetadataUtilities.framework/Versions/A/MetadataUtilities
+       0x19c063000 -        0x19c0fdfff  com.apple.Metadata (14.8 - 2274.38.5.4) <9D6E1AB8-0B17-380B-9220-332C8318EEE1> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Metadata
+       0x19c0fe000 -        0x19c106ffb  com.apple.DiskArbitration (2.7 - 2.7) <B0610745-4ADA-3EDE-B62D-5F24E8E30909> /System/Library/Frameworks/DiskArbitration.framework/Versions/A/DiskArbitration
+       0x19c107000 -        0x19c4f0fdf  com.apple.vImage (8.1 - 587.100.1) <E58CD6F3-CFC8-32BE-AECE-3EEBC8711F5D> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vImage.framework/Versions/A/vImage
+       0x19cb5d000 -        0x19cb6cfff  com.apple.OpenDirectory (14.8 - 642) <DD1A4C3C-D200-3A2C-A34C-875E577FE116> /System/Library/Frameworks/OpenDirectory.framework/Versions/A/OpenDirectory
+       0x19cb6d000 -        0x19cb8cffb  com.apple.CFOpenDirectory (14.8 - 642) <B68895FD-A5D1-307E-9C17-6239DC7C4713> /System/Library/Frameworks/OpenDirectory.framework/Versions/A/Frameworks/CFOpenDirectory.framework/Versions/A/CFOpenDirectory
+       0x19cb8d000 -        0x19cb99ff7  com.apple.CoreServices.FSEvents (1376.120.2 - 1376.120.2) <428CF596-F685-3F05-8359-DB2C8EA8B004> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/FSEvents.framework/Versions/A/FSEvents
+       0x19cb9a000 -        0x19cbc4fff  com.apple.coreservices.SharedFileList (225 - 225) <39F0ABE1-C818-37B9-B5B1-58130C24424C> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/SharedFileList.framework/Versions/A/SharedFileList
+       0x19cbc5000 -        0x19cbcbfff  libapp_launch_measurement.dylib (17) <66A3032E-3F71-347E-A375-C8DCFB503A3D> /usr/lib/libapp_launch_measurement.dylib
+       0x19cbcc000 -        0x19cc15fff  com.apple.CoreAutoLayout (1.0 - 32) <01A7CDDB-8763-3137-9EF0-1D4EBCDDFFF0> /System/Library/PrivateFrameworks/CoreAutoLayout.framework/Versions/A/CoreAutoLayout
+       0x19cc16000 -        0x19ccfffff  libxml2.2.dylib (37.27) <EA9FE756-0D79-3485-9859-4BADB55AF79C> /usr/lib/libxml2.2.dylib
+       0x19e523000 -        0x19e54dff3  libsystem_containermanager.dylib (582.140.2.701.1) <79A80F5B-746E-3AA7-980E-19F141CC1859> /usr/lib/system/libsystem_containermanager.dylib
+       0x19e54e000 -        0x19e565fff  com.apple.IOSurface (352.50.1 - 352.50.1) <65DBBD43-1B3E-3036-A286-10083245FA69> /System/Library/Frameworks/IOSurface.framework/Versions/A/IOSurface
+       0x19f4e9000 -        0x19f4edfff  libsystem_configuration.dylib (1300.120.2.702.1) <A3007EBC-06B1-39A6-8D27-1D95E3EAC6FE> /usr/lib/system/libsystem_configuration.dylib
+       0x19f4ee000 -        0x19f4f3ff3  libsystem_sandbox.dylib (2190.140.13.708.1) <72D8AA62-0F4C-3AFB-B017-B676C23D4258> /usr/lib/system/libsystem_sandbox.dylib
+       0x19f4f6000 -        0x19f4f9ffb  com.apple.AppleSystemInfo (3.1.5 - 3.1.5) <550DDAA3-2B4F-3D19-968A-31C11EE1C9BE> /System/Library/PrivateFrameworks/AppleSystemInfo.framework/Versions/A/AppleSystemInfo
+       0x19f4fa000 -        0x19f4fbfff  liblangid.dylib (138) <1773BCE0-DD35-3945-B22D-CEC1CCFAE941> /usr/lib/liblangid.dylib
+       0x19f4fc000 -        0x19f61efff  com.apple.CoreNLP (1.0 - 313) <811A6306-2009-3FB0-8322-C31A1ACB4C24> /System/Library/PrivateFrameworks/CoreNLP.framework/Versions/A/CoreNLP
+       0x19f61f000 -        0x19f624fff  com.apple.LinguisticData (1.0 - 483.10) <5888A1FC-78DD-3768-A666-B21F7BAA8886> /System/Library/PrivateFrameworks/LinguisticData.framework/Versions/A/LinguisticData
+       0x19f625000 -        0x19fef8fef  libBNNS.dylib (830.120.10) <F7FA1C15-F4D6-3BB3-AD1D-3D1861C46E48> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBNNS.dylib
+       0x19fef9000 -        0x19ffe9f07  libvDSP.dylib (1043.120.8) <BBCFA303-5730-3B63-AD36-DDEEA6A8C422> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libvDSP.dylib
+       0x19ffea000 -        0x1a001dfff  com.apple.CoreEmoji (1.0 - 200.401) <33B5738E-037C-36B2-A430-22E153B3D733> /System/Library/PrivateFrameworks/CoreEmoji.framework/Versions/A/CoreEmoji
+       0x1a001e000 -        0x1a002dff7  com.apple.IOMobileFramebuffer (343.0.0 - 343.0.0) <EE15CAC3-BF59-3FE8-863B-892E4F8F8FCA> /System/Library/PrivateFrameworks/IOMobileFramebuffer.framework/Versions/A/IOMobileFramebuffer
+       0x1a0250000 -        0x1a02ddfff  com.apple.securityfoundation (6.0 - 55283) <59C709E2-D656-31DB-A7B2-34119988B6E7> /System/Library/Frameworks/SecurityFoundation.framework/Versions/A/SecurityFoundation
+       0x1a02de000 -        0x1a0304fff  com.apple.coreservices.BackgroundTaskManagement (1.0 - 104) <3C4B8A2F-3F65-3E30-ADFE-45703067233B> /System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/BackgroundTaskManagement
+       0x1a0310000 -        0x1a0312fff  libquarantine.dylib (172.140.2.700.1) <7C69EF1B-8647-38DB-80ED-3802B2CB1242> /usr/lib/system/libquarantine.dylib
+       0x1a0313000 -        0x1a031efff  libCheckFix.dylib (32) <5CB04533-1574-3A17-A459-FE12AB735DF0> /usr/lib/libCheckFix.dylib
+       0x1a031f000 -        0x1a0336fff  libcoretls.dylib (186) <84B7EF59-8E94-3B76-9EA7-F1B1A7C3B8E4> /usr/lib/libcoretls.dylib
+       0x1a0337000 -        0x1a0348ffb  libbsm.0.dylib (89) <7DE695CD-8396-3582-A0C2-F6841F63E3AB> /usr/lib/libbsm.0.dylib
+       0x1a0349000 -        0x1a03a4fff  libmecab.dylib (1062.400.200) <D2C10366-1545-32F3-A9E3-86EAB2757391> /usr/lib/libmecab.dylib
+       0x1a03a5000 -        0x1a03a7ffb  libgermantok.dylib (29) <9CB6E7E3-63B3-3F79-9FE4-95ABA0FCEBDD> /usr/lib/libgermantok.dylib
+       0x1a03a8000 -        0x1a03bcfff  libLinearAlgebra.dylib (1447.120.2) <02E14640-6A7F-31EC-972D-6C198C86DAB1> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLinearAlgebra.dylib
+       0x1a09f6000 -        0x1a0ab9fdf  com.apple.AppleFSCompression (163.140.2 - 1.0) <FF77014E-A0B3-37D7-98AE-1727805D6F70> /System/Library/PrivateFrameworks/AppleFSCompression.framework/Versions/A/AppleFSCompression
+       0x1a0aba000 -        0x1a0ac6ffb  libbz2.1.0.dylib (45) <4B41D575-1768-3CD9-9EA8-5D51BF3615F5> /usr/lib/libbz2.1.0.dylib
+       0x1a0ac7000 -        0x1a0aceffb  libsystem_coreservices.dylib (152.5.3.10) <BDC16452-EAD0-3E69-95C2-B1F155BB8758> /usr/lib/system/libsystem_coreservices.dylib
+       0x1a0acf000 -        0x1a0b00fff  com.apple.CoreServices.OSServices (1141.1 - 1141.1) <79406147-008D-321B-83FD-70A41012B98D> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/OSServices.framework/Versions/A/OSServices
+       0x1a0de8000 -        0x1a0df6fff  libz.1.dylib (91.40.4) <728AFEEA-BEDB-3A9C-BAF7-5C171DAABF73> /usr/lib/libz.1.dylib
+       0x1a0df7000 -        0x1a0e2dff3  libsystem_m.dylib (3252.100.9) <A7000A80-41A0-3A99-8EF0-80A52F527B77> /usr/lib/system/libsystem_m.dylib
+       0x1a0e2e000 -        0x1a0e31fff  libcharset.1.dylib (102) <BA850199-6EAA-335A-82D5-7A9BB0236AD3> /usr/lib/libcharset.1.dylib
+       0x1a0e32000 -        0x1a0e39ffb  libmacho.dylib (1010.6) <EAD47D11-CDFD-33EA-912E-533A1969C738> /usr/lib/system/libmacho.dylib
+       0x1a0e3a000 -        0x1a0e59fff  libkxld.dylib (10063.141.1.710.3) <C9E98E61-949D-3B61-AB1D-B004E4EB999E> /usr/lib/system/libkxld.dylib
+       0x1a0e5a000 -        0x1a0e67ff7  libcommonCrypto.dylib (600028.100.1) <3F9EB378-BBDB-304D-B3F1-DABFC8CB26E0> /usr/lib/system/libcommonCrypto.dylib
+       0x1a0e68000 -        0x1a0e73fff  libunwind.dylib (1700.242) <65A79CE9-B875-3ECE-A2B5-700488E7722E> /usr/lib/system/libunwind.dylib
+       0x1a0e74000 -        0x1a0e7bfff  liboah.dylib (318.9) <43E83574-4A9D-380B-91CE-1EB31F947303> /usr/lib/liboah.dylib
+       0x1a0e7c000 -        0x1a0e85ff7  libcopyfile.dylib (196.120.5.701.1) <EB415C92-23D0-356D-B262-BE89C2F684D7> /usr/lib/system/libcopyfile.dylib
+       0x1a0e86000 -        0x1a0e89fff  libcompiler_rt.dylib (103.2) <C5D14B63-58D1-3E96-93D8-7C05B79FE496> /usr/lib/system/libcompiler_rt.dylib
+       0x1a0e8a000 -        0x1a0e8effb  libsystem_collections.dylib (1592.100.35.700.2) <C3E2D866-82F3-380B-AF2D-DD2A0BA884E3> /usr/lib/system/libsystem_collections.dylib
+       0x1a0e8f000 -        0x1a0e92ffb  libsystem_secinit.dylib (147.140.2) <9473442E-A315-3AEA-A35E-DF567AF34B09> /usr/lib/system/libsystem_secinit.dylib
+       0x1a0e93000 -        0x1a0e95ffb  libremovefile.dylib (70.100.4) <5BDF8826-007D-32FF-8203-416CBDFD669C> /usr/lib/system/libremovefile.dylib
+       0x1a0e96000 -        0x1a0e96ffb  libkeymgr.dylib (31) <CB5763E9-01D0-3D88-831C-39BF6A18A357> /usr/lib/system/libkeymgr.dylib
+       0x1a0e97000 -        0x1a0e9fff7  libsystem_dnssd.dylib (2200.140.11.702.1) <60E5DC75-1B11-3D55-9103-59300FACDEE5> /usr/lib/system/libsystem_dnssd.dylib
+       0x1a0ea0000 -        0x1a0ea5fff  libcache.dylib (93) <33228BAC-E0C4-3995-88E5-B30F6794D75B> /usr/lib/system/libcache.dylib
+       0x1a0ea6000 -        0x1a0ea7fff  libSystem.B.dylib (1345.120.2) <37F5A6B3-2238-3DC9-B5F8-9C22D7E2241B> /usr/lib/libSystem.B.dylib
+       0x1a0ea8000 -        0x1a0eabfff  libfakelink.dylib (5) <2CD16B21-7659-3E50-B758-ABB0BAB34286> /usr/lib/libfakelink.dylib
+       0x1a0eac000 -        0x1a0eacffb  com.apple.SoftLinking (1.0 - 47) <38E6AC83-927E-3B3B-AD4A-03A0B7B8B685> /System/Library/PrivateFrameworks/SoftLinking.framework/Versions/A/SoftLinking
+       0x1a0ead000 -        0x1a0ee2ff3  libpcap.A.dylib (131) <7E737A0E-FED3-3716-A98E-AD811FFEA1FA> /usr/lib/libpcap.A.dylib
+       0x1a0ee3000 -        0x1a0ee9ff7  libiconv.2.dylib (102) <93F67134-27B5-324E-82D5-F375892BDA58> /usr/lib/libiconv.2.dylib
+       0x1a0eea000 -        0x1a0efbfff  libcmph.dylib (8) <A6573E73-DAF9-30B1-95F2-234DBDBE62BB> /usr/lib/libcmph.dylib
+       0x1a0efc000 -        0x1a0f84ff3  libarchive.2.dylib (131.140.2.708.1) <BA8D9CF5-7737-375B-971A-9CAA7E59DBDA> /usr/lib/libarchive.2.dylib
+       0x1a0f85000 -        0x1a0ffbff3  com.apple.SearchKit (1.4.1 - 1.4.1) <152B40D5-3D98-3544-A5E9-C48C5CEE8905> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/SearchKit.framework/Versions/A/SearchKit
+       0x1a0ffc000 -        0x1a0ffdff7  libThaiTokenizer.dylib (15) <059BF3A0-C959-3065-9C22-F75816EEAE65> /usr/lib/libThaiTokenizer.dylib
+       0x1a0ffe000 -        0x1a1024ff7  com.apple.applesauce (1.0 - 16.60.1) <BCFBA766-46C1-3D1F-B737-5D08B82C43E6> /System/Library/PrivateFrameworks/AppleSauce.framework/Versions/A/AppleSauce
+       0x1a1025000 -        0x1a103fffb  libapple_nghttp2.dylib (20.120.2) <F992893E-93FD-32FE-ABF7-71C9DD948FBF> /usr/lib/libapple_nghttp2.dylib
+       0x1a1040000 -        0x1a1052ff3  libSparseBLAS.dylib (1447.120.2) <686679FD-C52C-3A10-ABFF-A8282AA07D00> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libSparseBLAS.dylib
+       0x1a1055000 -        0x1a105afff  libpam.2.dylib (33) <C31CDCC4-6876-31CB-9F56-C71E274AECC8> /usr/lib/libpam.2.dylib
+       0x1a105b000 -        0x1a112aff7  libcompression.dylib (169.100.2) <1115BF95-51C3-34A4-A596-AEF27E7C18DF> /usr/lib/libcompression.dylib
+       0x1a112b000 -        0x1a112fffb  libQuadrature.dylib (7) <8DC982F5-6F32-37E7-812A-7AFF7CB7F50C> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libQuadrature.dylib
+       0x1a1130000 -        0x1a22aafcf  libLAPACK.dylib (1447.120.2) <7815B395-ABF0-3926-B28D-9D6DF65582B3> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libLAPACK.dylib
+       0x1a22ab000 -        0x1a2301fff  com.apple.DictionaryServices (1.2 - 355) <D352FCB1-D086-3D2C-8FFA-900E1F540FF6> /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/DictionaryServices.framework/Versions/A/DictionaryServices
+       0x1a2302000 -        0x1a2320ff7  liblzma.5.dylib (20.0.0.701.1) <6221AB85-478A-3BF2-A2EA-5A65F43F2E32> /usr/lib/liblzma.5.dylib
+       0x1a2321000 -        0x1a2322ffb  libcoretls_cfhelpers.dylib (186) <DD71D515-A893-31FC-8DA0-402171EC65DF> /usr/lib/libcoretls_cfhelpers.dylib
+       0x1a2323000 -        0x1a2392ff7  com.apple.APFS (2236.141.1 - 2236.141.1) <7F6F0329-DC43-370B-8B17-D685E7AF7B58> /System/Library/PrivateFrameworks/APFS.framework/Versions/A/APFS
+       0x1a2393000 -        0x1a23a1ffb  libxar.1.dylib (498) <748AD19E-C985-3A17-BA44-52CECB75CCB3> /usr/lib/libxar.1.dylib
+       0x1a23a2000 -        0x1a23a5ff7  libutil.dylib (72) <40E47A62-8AB3-37D1-B65A-E3A93BA6972B> /usr/lib/libutil.dylib
+       0x1a23a6000 -        0x1a23d1fff  libxslt.1.dylib (20.7) <88BED929-415B-37E0-BD35-54FDD13D7972> /usr/lib/libxslt.1.dylib
+       0x1a23da000 -        0x1a2455fff  libvMisc.dylib (1043.120.8) <490FB51B-C0BA-31C2-9293-A850CF143E8D> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libvMisc.dylib
+       0x1a2782000 -        0x1a278cfff  libheimdal-asn1.dylib (689.140.1) <07EABA3F-5B81-3BFB-A1DE-951FDBA801FA> /usr/lib/libheimdal-asn1.dylib
+       0x1a3f38000 -        0x1a4495fff  libswiftCore.dylib (5.10 - 5.10.0.12.11) <7D051773-5041-3279-83B8-A84D701B7BD4> /usr/lib/swift/libswiftCore.dylib
+       0x1a647c000 -        0x1a65b9fff  com.apple.combine (1.0 - 311) <0FFDC236-E3B2-3DA5-BBBB-90E69C4C0184> /System/Library/Frameworks/Combine.framework/Versions/A/Combine
+       0x1a8557000 -        0x1a8557fff  com.apple.Accelerate.vecLib (3.11 - vecLib 3.11) <EE2E0851-01B0-307C-A7C6-E7A18EAF1604> /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/vecLib
+       0x1a8580000 -        0x1a8580fff  com.apple.CoreServices (1226 - 1226) <B4798C19-346D-3FD8-859D-FAFB7A2120C7> /System/Library/Frameworks/CoreServices.framework/Versions/A/CoreServices
+       0x1a8845000 -        0x1a8845fff  com.apple.Accelerate (1.11 - Accelerate 1.11) <2FD2A375-73F4-3D4D-9D01-6A683740800B> /System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate
+       0x1a9bf1000 -        0x1a9c08ff7  libswiftDispatch.dylib (41) <BB10FF9F-C765-3117-95BB-AF1B9AAA8769> /usr/lib/swift/libswiftDispatch.dylib
+       0x1ac46d000 -        0x1ac470ff5  libswiftObjectiveC.dylib (8) <0C1D72B7-386B-32CB-9068-DE66DF4D8A7B> /usr/lib/swift/libswiftObjectiveC.dylib
+       0x1ac471000 -        0x1ac48bfff  libswiftos.dylib (1049.100.4) <8356A876-A078-3A0F-91EF-29BF6C63335F> /usr/lib/swift/libswiftos.dylib
+       0x1b76d7000 -        0x1b76e0ff3  libswiftDarwin.dylib (5.10 - 5.10.0.12.11) <E1A71671-E4A4-345E-A0FF-673C0175A72F> /usr/lib/swift/libswiftDarwin.dylib
+       0x1b9c38000 -        0x1b9c5cfff  libmis.dylib (386.140.3) <ACE0AB62-E858-3853-A6FD-F24ED78AB0E4> /usr/lib/libmis.dylib
+       0x1b9c6a000 -        0x1b9c70fff  libswiftCoreFoundation.dylib (2401) <E402E4A2-7637-3300-82BE-DAFFBC5F8286> /usr/lib/swift/libswiftCoreFoundation.dylib
+       0x1b9c7c000 -        0x1b9cb3ff2  libswiftXPC.dylib (36.100.8) <7EE349B6-9413-365D-A8C5-7970BAD34827> /usr/lib/swift/libswiftXPC.dylib
+       0x1b9cb5000 -        0x1b9cb5fff  libswiftIOKit.dylib (1) <45C49C7A-E90D-375A-A3E6-EA9DE1E77462> /usr/lib/swift/libswiftIOKit.dylib
+       0x1ca379000 -        0x1ca380fff  com.apple.MobileSystemServices (1.0 - 1) <E6374C48-1D6D-3908-8A16-FB434A90F2AF> /System/Library/PrivateFrameworks/MobileSystemServices.framework/Versions/A/MobileSystemServices
+       0x1e842c000 -        0x1e842ffff  com.apple.ConfigProfileHelper (16.6 - 1672) <0ADE7090-6863-3FC5-A3F9-095C456DCEA8> /System/Library/PrivateFrameworks/ConfigProfileHelper.framework/Versions/A/ConfigProfileHelper
+       0x22cf58000 -        0x22cf6bfff  com.apple.private.AppleMobileFileIntegrity-fmk (1.0 - 1) <8C10FBD2-0619-30C5-B2D8-D5F607402689> /System/Library/PrivateFrameworks/AppleMobileFileIntegrity.framework/Versions/A/AppleMobileFileIntegrity
+       0x22f7bd000 -        0x22f91cfff  com.apple.CollectionsInternal (1.1.0 - 22) <03CC7991-C948-3FF1-9302-855A77DDD7DD> /System/Library/PrivateFrameworks/CollectionsInternal.framework/Versions/A/CollectionsInternal
+       0x23d212000 -        0x23d2f1fff  com.apple.InstalledContentLibrary (1.0 - 1.0) <0965AAA4-614F-3409-98CF-067B641709FE> /System/Library/PrivateFrameworks/InstalledContentLibrary.framework/Versions/A/InstalledContentLibrary
+       0x23f0bf000 -        0x23f657fff  com.apple.MIL (3304.6 - 3304.6.1) <9FE1D85E-7CDC-3C93-BE18-9E0969292516> /System/Library/PrivateFrameworks/MIL.framework/Versions/A/MIL
+       0x240970000 -        0x2409bbfff  com.apple.MessageSecurity (1.0 - 101.100.4) <2389C81B-4212-32E3-AA62-2112A8646712> /System/Library/PrivateFrameworks/MessageSecurity.framework/Versions/A/MessageSecurity
+       0x245a7e000 -        0x245a86ff7  com.apple.ReflectionInternal (1.0.0 - 22) <4B6C49EB-588A-3509-87EB-45B6155B8541> /System/Library/PrivateFrameworks/ReflectionInternal.framework/Versions/A/ReflectionInternal
+       0x246010000 -        0x246027fff  com.apple.RuntimeInternal (1.0.0 - 22) <C9737FB0-F7AC-3603-BBDD-8BCE57429B58> /System/Library/PrivateFrameworks/RuntimeInternal.framework/Versions/A/RuntimeInternal
+       0x25a3f6000 -        0x25a401fff  libCoreEntitlements.dylib (53.100.4) <1E59567F-1266-3242-91C8-96EFA4C903B4> /usr/lib/libCoreEntitlements.dylib
+       0x25a5e4000 -        0x25a5effff  libTLE.dylib (53.100.4) <39DF2E22-1052-356E-BCA2-1E78CE600E75> /usr/lib/libTLE.dylib
+       0x25b9e9000 -        0x25ba54ff7  libswift_Concurrency.dylib (5.10 - 5.10.0.12.11) <1E3AC0C2-5788-3266-93A6-01CD4FDC65AD> /usr/lib/swift/libswift_Concurrency.dylib
+       0x25ba94000 -        0x25bb3cff7  libswift_RegexParser.dylib (5.10 - 5.10.0.12.11) <1C9D5C63-E21A-3E79-AFBB-10E481F4EEB1> /usr/lib/swift/libswift_RegexParser.dylib
+       0x25bb3d000 -        0x25bbdfff7  libswift_StringProcessing.dylib (5.10 - 5.10.0.12.11) <A96E1A97-4DCC-357E-BC70-D673E181050B> /usr/lib/swift/libswift_StringProcessing.dylib
+       0x25bd36000 -        0x25bd39fff  libsystem_darwindirectory.dylib (86.0.2) <8213C076-D261-366B-878E-9D6D78FE1891> /usr/lib/system/libsystem_darwindirectory.dylib
+       0x25bd3a000 -        0x25bd3dfff  libsystem_eligibility.dylib (47.140.3) <0D40D8DC-192E-3646-A939-CA726FAC08DD> /usr/lib/system/libsystem_eligibility.dylib
+       0x25bd3e000 -        0x25bd41ffb  libsystem_sanitizers.dylib (8) <40EAC4C7-F12F-39BA-9DA1-E1DEB83A15C0> /usr/lib/system/libsystem_sanitizers.dylib
