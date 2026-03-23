@@ -67,18 +67,18 @@ end subroutine
 subroutine layer_norm(x, g, b, eps, y)
 real(sp), intent(in) :: x(:,:), g(:), b(:), eps
 real(sp), intent(out) :: y(size(x,1),size(x,2))
-real(sp) :: mean_val(size(x,2)), variance(size(x,2))
+real(sp) :: mean(size(x,2)), variance(size(x,2))
 integer :: i
 do i = 1, size(x,2)
-    mean_val(i) = sum(x(:,i)) / size(x,1)
-    variance(i) = sum((x(:,i) - mean_val(i))**2) / size(x,1)
+    mean(i) = sum(x(:,i)) / size(x,1)
+    variance(i) = sum((x(:,i) - mean(i))**2) / size(x,1)
 end do
 !do i = 1, size(x,1)
-!    y(i,:) = (x(i,:) - mean_val(:)) / sqrt(variance(:) + eps)
+!    y(i,:) = (x(i,:) - mean(:)) / sqrt(variance(:) + eps)
 !    y(i,:) = g(i) * y(i,:) + b(i)
 !end do
 do i = 1, size(x,2)
-    y(:,i) = (x(:,i) - mean_val(i)) / sqrt(variance(i) + eps)
+    y(:,i) = (x(:,i) - mean(i)) / sqrt(variance(i) + eps)
     y(:,i) = g(:) * y(:,i) + b(:)
 end do
 end subroutine
