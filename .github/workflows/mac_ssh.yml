@@ -1,5 +1,8 @@
 name: Mac M1 SSH Session
-on: [workflow_dispatch] # Allows you to trigger it manually from the GitHub UI
+on:
+  push:
+    branches:
+      - test_mac
 
 jobs:
   build:
