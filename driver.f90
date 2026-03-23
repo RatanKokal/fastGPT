@@ -11,315 +11,344 @@ character(1), parameter :: LF = achar(10)
 contains
 
 subroutine load_input(filename, input_txt, n_tokens_to_generate)
-    character(*), intent(in) :: filename
-    character(:), allocatable, intent(out) :: input_txt
-    integer, intent(out) :: n_tokens_to_generate
-    character(1024) :: input_txt2
-    integer :: u, ios
-    namelist / input_fastGPT / n_tokens_to_generate
-    
-    allocate(character(0) :: input_txt)
-    input_txt = ""
-    open(newunit=u, file=filename, status="old")
-    read(u, input_fastGPT)
-    do
-        read(u, "(a)", iostat=ios) input_txt2
-        if (ios /= 0) exit
-        if (len(input_txt) > 0) input_txt = input_txt // char(10)
-        input_txt = input_txt // trim(input_txt2)
-    end do
-    close(u)
+! Load the input from a namelist `filename`
+character(*), intent(in) :: filename
+character(:), allocatable, intent(out) :: input_txt
+integer, intent(out) :: n_tokens_to_generate
+character(1024) :: input_txt2
+integer :: u, ios
+namelist / input_fastGPT / n_tokens_to_generate
+allocate(character(0) :: input_txt)
+input_txt = ""
+open(newunit=u, file=filename, status="old")
+read(u, input_fastGPT)
+do
+    read(u, "(a)", iostat=ios) input_txt2
+    if (ios /= 0) exit
+    if (len(input_txt) > 0) input_txt = input_txt // char(10)
+    input_txt = input_txt // trim(input_txt2)
+end do
+close(u)
 end subroutine
 
+! Skips `amount` bytes from the current position
 subroutine fskip(u, amount)
-    integer, intent(in) :: u, amount
-    character, allocatable :: tmp(:)
-    allocate(tmp(amount))
-    read(u) tmp
+integer, intent(in) :: u, amount
+character, allocatable :: tmp(:)
+! Note: the code below is equivalent to the non-standard: fseek(u, amount, 1)
+! Let's allocate on heap, in case the skip is large
+allocate(tmp(amount))
+read(u) tmp
 end subroutine
 
+! Aligns file position in `u` to 32 byte boundary after `A` was read
 subroutine align_i4(u, A)
-    integer, intent(in) :: u
-    integer, intent(in) :: A(..)
-    integer :: n, alignment
-    alignment = 32
-    n = size(A)*4
-    call fskip(u, alignment-modulo(n,alignment))
+integer, intent(in) :: u
+integer, intent(in) :: A(..)
+integer :: n, alignment
+alignment = 32
+n = size(A)*4
+call fskip(u, alignment-modulo(n,alignment))
 end subroutine
 
 subroutine align_str(u, A)
-    integer, intent(in) :: u
-    character, intent(in) :: A(:)
-    integer :: n, alignment
-    alignment = 32
-    n = size(A)
-    if (modulo(n, alignment) /= 0) then
-        call fskip(u, alignment-modulo(n,alignment))
-    end if
+integer, intent(in) :: u
+character, intent(in) :: A(:)
+integer :: n, alignment
+alignment = 32
+n = size(A)
+if (modulo(n, alignment) /= 0) then
+    call fskip(u, alignment-modulo(n,alignment))
+end if
 end subroutine
 
 subroutine load_model(filename, m)
-    character(*), intent(in) :: filename
-    type(model_t), intent(out) :: m
-    
-    integer, parameter :: offset_offset = &
-        4 + 4 + 8 + 8 + 8 + 19 + 4 
-    integer, parameter :: current_model_mark = 262477463
-    integer, parameter :: current_model_version = 2
-    integer :: model_mark
-    integer :: u, data_offset
-    
-    real(sp), allocatable :: temp_wte(:,:)
-    real(sp), allocatable :: tmp_mlp_fc_w(:,:,:), tmp_mlp_fc_b(:,:), &
-        tmp_mlp_proj_w(:,:,:), tmp_mlp_proj_b(:,:), &
-        tmp_attn_w(:,:,:), tmp_attn_b(:,:), &
-        tmp_attn_proj_w(:,:,:), tmp_attn_proj_b(:,:), &
-        tmp_ln1_b(:,:), tmp_ln1_g(:,:), &
-        tmp_ln2_b(:,:), tmp_ln2_g(:,:)
-    integer :: i
+character(*), intent(in) :: filename
+type(model_t), intent(out) :: m
+! We use the following fastGPT model type number
+!   fastGPT (digits look similar to the letters they represent)
+! 0xfa51697 = 262477463
 
-    open(newunit=u, file=filename, form="unformatted", access="stream", status="old")
-    call fskip(u, offset_offset)
-    read(u) data_offset
-    call fskip(u, data_offset-offset_offset-4)
-    read(u) model_mark
-    
-    if (model_mark /= current_model_mark) error stop "Invalid fastGPT model file"
-    
-    read(u) m%model_file_version
-    if (m%model_file_version /= current_model_version) error stop "Incompatible model version"
-    
-    read(u) m%n_vocab, m%n_ctx, m%n_embd, m%n_layer, m%n_head, m%n_decoder_idx, &
-        m%n_decoder_txt, m%n_vocab_idx, m%n_vocab_txt, m%n_byte_encoder
-    call fskip(u, 16) ! Pad
+! We read the offset to the data section at this position, which is the first
+! variable in the metadata, the name is "general.data_offset", type i32.
+integer, parameter :: offset_offset = &
+    ! header
+    4 + & ! u8[4] magic
+    4 + & ! u32 version
+    8 + & ! u64 n_arrays
+    8 + & ! u64 n_kv
+    ! kv
+    8 + & ! u64 n_str
+    19 + & ! len("general.data_offset")
+    4 ! u32 type of value
+integer, parameter :: current_model_mark = 262477463
+integer, parameter :: current_model_version = 2
+integer :: model_mark
+integer :: u
+integer :: data_offset
+real(sp), allocatable :: temp_wte(:,:)
+real(sp), allocatable :: tmp_mlp_fc_w(:,:,:), tmp_mlp_fc_b(:,:), &
+    tmp_mlp_proj_w(:,:,:), tmp_mlp_proj_b(:,:), &
+    tmp_attn_w(:,:,:), tmp_attn_b(:,:), &
+    tmp_attn_proj_w(:,:,:), tmp_attn_proj_b(:,:), &
+    tmp_ln1_b(:,:), tmp_ln1_g(:,:), &
+    tmp_ln2_b(:,:), tmp_ln2_g(:,:)
+integer :: i
+open(newunit=u, file=filename, form="unformatted", access="stream", status="old")
+call fskip(u, offset_offset)
+read(u) data_offset
+! Alternatively we could have done: rewind(u); call fskip(u, data_offset)
+call fskip(u, data_offset-offset_offset-4)
+read(u) model_mark
+if (model_mark /= current_model_mark) then
+    print *, "Found:", model_mark
+    print *, "Expected:", current_model_mark
+    error stop "Invalid fastGPT model file"
+end if
+read(u) m%model_file_version
+if (m%model_file_version /= current_model_version) then
+    print *, "Found:", m%model_file_version
+    print *, "Expected:", current_model_version
+    error stop "Incompatible model version"
+end if
+read(u) m%n_vocab, m%n_ctx, m%n_embd, m%n_layer, m%n_head, m%n_decoder_idx, &
+    m%n_decoder_txt, m%n_vocab_idx, m%n_vocab_txt, m%n_byte_encoder
+call fskip(u, 16) ! Pad the 12 element i32 array to 32 byte boundary
+allocate(temp_wte(m%n_embd,m%n_vocab), m%wpe(m%n_embd,m%n_ctx), &
+    tmp_mlp_fc_w(4*m%n_embd,m%n_embd,m%n_layer), tmp_mlp_fc_b(4*m%n_embd,m%n_layer), &
+    tmp_mlp_proj_w(m%n_embd,4*m%n_embd,m%n_layer), tmp_mlp_proj_b(m%n_embd,m%n_layer), &
+    tmp_attn_w(3*m%n_embd,m%n_embd,m%n_layer), tmp_attn_b(3*m%n_embd,m%n_layer), &
+    tmp_attn_proj_w(m%n_embd,m%n_embd,m%n_layer), tmp_attn_proj_b(m%n_embd,m%n_layer), &
+    tmp_ln1_b(m%n_embd,m%n_layer), tmp_ln1_g(m%n_embd,m%n_layer), &
+    tmp_ln2_b(m%n_embd,m%n_layer), tmp_ln2_g(m%n_embd,m%n_layer), &
+    m%lnf_b(m%n_embd), m%lnf_g(m%n_embd), &
+    m%decoder_idx(0:m%n_decoder_idx-1), m%decoder_txt(m%n_decoder_txt), &
+    m%vocab_idx(0:m%n_vocab_idx-1), m%vocab_txt(m%n_vocab_txt), &
+    m%byte_encoder(0:m%n_byte_encoder-1))
+read(u) temp_wte, m%wpe, tmp_mlp_fc_w, tmp_mlp_fc_b, tmp_mlp_proj_w, tmp_mlp_proj_b, &
+    tmp_attn_w, tmp_attn_b, tmp_attn_proj_w, tmp_attn_proj_b, &
+    tmp_ln1_b, tmp_ln1_g, tmp_ln2_b, tmp_ln2_g, m%lnf_b, m%lnf_g, m%decoder_idx
 
-    allocate(temp_wte(m%n_embd,m%n_vocab), m%wpe(m%n_embd,m%n_ctx), &
-        tmp_mlp_fc_w(4*m%n_embd,m%n_embd,m%n_layer), tmp_mlp_fc_b(4*m%n_embd,m%n_layer), &
-        tmp_mlp_proj_w(m%n_embd,4*m%n_embd,m%n_layer), tmp_mlp_proj_b(m%n_embd,m%n_layer), &
-        tmp_attn_w(3*m%n_embd,m%n_embd,m%n_layer), tmp_attn_b(3*m%n_embd,m%n_layer), &
-        tmp_attn_proj_w(m%n_embd,m%n_embd,m%n_layer), tmp_attn_proj_b(m%n_embd,m%n_layer), &
-        tmp_ln1_b(m%n_embd,m%n_layer), tmp_ln1_g(m%n_embd,m%n_layer), &
-        tmp_ln2_b(m%n_embd,m%n_layer), tmp_ln2_g(m%n_embd,m%n_layer), &
-        m%lnf_b(m%n_embd), m%lnf_g(m%n_embd), &
-        m%decoder_idx(0:m%n_decoder_idx-1), m%decoder_txt(m%n_decoder_txt), &
-        m%vocab_idx(0:m%n_vocab_idx-1), m%vocab_txt(m%n_vocab_txt), &
-        m%byte_encoder(0:m%n_byte_encoder-1))
+! Pre-transpose WTE once to avoid runtime itcopy
+allocate(m%wte(m%n_vocab, m%n_embd))
+m%wte = transpose(temp_wte)
 
-    read(u) temp_wte, m%wpe, tmp_mlp_fc_w, tmp_mlp_fc_b, tmp_mlp_proj_w, tmp_mlp_proj_b, &
-        tmp_attn_w, tmp_attn_b, tmp_attn_proj_w, tmp_attn_proj_b, &
-        tmp_ln1_b, tmp_ln1_g, tmp_ln2_b, tmp_ln2_g, m%lnf_b, m%lnf_g, m%decoder_idx
+! Unpack the 3D weights into 2D layers for contiguous cache layout
+allocate(m%layers(m%n_layer))
+do i = 1, m%n_layer
+    allocate(m%layers(i)%mlp_fc_w(4*m%n_embd, m%n_embd), m%layers(i)%mlp_fc_b(4*m%n_embd), &
+             m%layers(i)%mlp_proj_w(m%n_embd, 4*m%n_embd), m%layers(i)%mlp_proj_b(m%n_embd), &
+             m%layers(i)%attn_w(3*m%n_embd, m%n_embd), m%layers(i)%attn_b(3*m%n_embd), &
+             m%layers(i)%attn_proj_w(m%n_embd, m%n_embd), m%layers(i)%attn_proj_b(m%n_embd), &
+             m%layers(i)%ln1_b(m%n_embd), m%layers(i)%ln1_g(m%n_embd), &
+             m%layers(i)%ln2_b(m%n_embd), m%layers(i)%ln2_g(m%n_embd))
+    m%layers(i)%mlp_fc_w = tmp_mlp_fc_w(:,:,i)
+    m%layers(i)%mlp_fc_b = tmp_mlp_fc_b(:,i)
+    m%layers(i)%mlp_proj_w = tmp_mlp_proj_w(:,:,i)
+    m%layers(i)%mlp_proj_b = tmp_mlp_proj_b(:,i)
+    m%layers(i)%attn_w = tmp_attn_w(:,:,i)
+    m%layers(i)%attn_b = tmp_attn_b(:,i)
+    m%layers(i)%attn_proj_w = tmp_attn_proj_w(:,:,i)
+    m%layers(i)%attn_proj_b = tmp_attn_proj_b(:,i)
+    m%layers(i)%ln1_b = tmp_ln1_b(:,i)
+    m%layers(i)%ln1_g = tmp_ln1_g(:,i)
+    m%layers(i)%ln2_b = tmp_ln2_b(:,i)
+    m%layers(i)%ln2_g = tmp_ln2_g(:,i)
+end do
 
-    ! Pre-transpose WTE once to avoid runtime itcopy
-    allocate(m%wte(m%n_vocab, m%n_embd))
-    m%wte = transpose(temp_wte)
-
-    ! Unpack the 3D weights into 2D layers for contiguous cache layout
-    allocate(m%layers(m%n_layer))
-    do i = 1, m%n_layer
-        allocate(m%layers(i)%mlp_fc_w(4*m%n_embd, m%n_embd), m%layers(i)%mlp_fc_b(4*m%n_embd), &
-                 m%layers(i)%mlp_proj_w(m%n_embd, 4*m%n_embd), m%layers(i)%mlp_proj_b(m%n_embd), &
-                 m%layers(i)%attn_w(3*m%n_embd, m%n_embd), m%layers(i)%attn_b(3*m%n_embd), &
-                 m%layers(i)%attn_proj_w(m%n_embd, m%n_embd), m%layers(i)%attn_proj_b(m%n_embd), &
-                 m%layers(i)%ln1_b(m%n_embd), m%layers(i)%ln1_g(m%n_embd), &
-                 m%layers(i)%ln2_b(m%n_embd), m%layers(i)%ln2_g(m%n_embd))
-
-        m%layers(i)%mlp_fc_w = tmp_mlp_fc_w(:,:,i)
-        m%layers(i)%mlp_fc_b = tmp_mlp_fc_b(:,i)
-        m%layers(i)%mlp_proj_w = tmp_mlp_proj_w(:,:,i)
-        m%layers(i)%mlp_proj_b = tmp_mlp_proj_b(:,i)
-        m%layers(i)%attn_w = tmp_attn_w(:,:,i)
-        m%layers(i)%attn_b = tmp_attn_b(:,i)
-        m%layers(i)%attn_proj_w = tmp_attn_proj_w(:,:,i)
-        m%layers(i)%attn_proj_b = tmp_attn_proj_b(:,i)
-        m%layers(i)%ln1_b = tmp_ln1_b(:,i)
-        m%layers(i)%ln1_g = tmp_ln1_g(:,i)
-        m%layers(i)%ln2_b = tmp_ln2_b(:,i)
-        m%layers(i)%ln2_g = tmp_ln2_g(:,i)
-    end do
-    
-    call align_i4(u, m%decoder_idx)
-    read(u) m%decoder_txt
-    call align_str(u, m%decoder_txt)
-    read(u) m%vocab_idx
-    call align_i4(u, m%vocab_idx)
-    read(u) m%vocab_txt
-    call align_str(u, m%vocab_txt)
-    read(u) m%byte_encoder
-    close(u)
+call align_i4(u, m%decoder_idx)
+read(u) m%decoder_txt
+call align_str(u, m%decoder_txt)
+read(u) m%vocab_idx
+call align_i4(u, m%vocab_idx)
+read(u) m%vocab_txt
+call align_str(u, m%vocab_txt)
+read(u) m%byte_encoder
+close(u)
 end subroutine
 
 subroutine gpt2_driver(input, output, m)
-    integer, allocatable, intent(out) :: input(:), output(:)
-    type(model_t), intent(out) :: m
-    character(:), allocatable :: input_txt
-    integer :: n_tokens_to_generate
-    real(dp) :: t1, t2
-    
-    call load_input("input", input_txt, n_tokens_to_generate)
+integer, allocatable, intent(out) :: input(:), output(:)
+type(model_t), intent(out) :: m
+character(:), allocatable :: input_txt
+integer :: n_tokens_to_generate
+real(dp) :: t1, t2
+call load_input("input", input_txt, n_tokens_to_generate)
 
-    print "(a)", "Loading the model..."
-    call cpu_time(t1)
-    call load_model("model.gguf", m)
-    call cpu_time(t2)
-    print "(a,f8.3,a,i2)", "    done. Time:", t2-t1, "s, Model file version:", m%model_file_version
-    print *
-    print "(a)", "Model parameters:"
-    print "(a,i6)", "n_vocab =", m%n_vocab
-    print "(a,i6)", "n_ctx   =", m%n_ctx
-    print "(a,i6)", "n_embd  =", m%n_embd
-    print "(a,i6)", "n_layer =", m%n_layer
-    print "(a,i6)", "n_head  =", m%n_head
-    print *
+! Load the model
+print "(a)", "Loading the model..."
+call cpu_time(t1)
+call load_model("model.gguf", m)
+call cpu_time(t2)
+print "(a,f8.3,a,i2)", "    done. Time:", t2-t1, "s, Model file version:", m%model_file_version
+print *
+print "(a)", "Model parameters:"
+print "(a,i6)", "n_vocab =", m%n_vocab
+print "(a,i6)", "n_ctx   =", m%n_ctx
+print "(a,i6)", "n_embd  =", m%n_embd
+print "(a,i6)", "n_layer =", m%n_layer
+print "(a,i6)", "n_head  =", m%n_head
+print *
 
-    call gpt2_driver2(input_txt, n_tokens_to_generate, m, input, output)
-end subroutine
+call gpt2_driver2(input_txt, n_tokens_to_generate, m, input, output)
+endsubroutine
 
 subroutine gpt2_driver2(input_txt, n_tokens_to_generate, m, input, output)
-    character(*), intent(in) :: input_txt
-    integer, intent(in) :: n_tokens_to_generate
-    type(model_t), intent(in) :: m
-    integer, allocatable, intent(out) :: input(:), output(:)
-    integer, allocatable :: byte_decoder(:)
-    integer :: n_seq, i
-    character(:), allocatable :: output_txt
-    real(dp) :: t1, t2, t1o, t2o
-    logical :: use_cache
+character(*), intent(in) :: input_txt
+integer, intent(in) :: n_tokens_to_generate
+type(model_t), intent(in) :: m
+integer, allocatable, intent(out) :: input(:), output(:)
+integer, allocatable :: byte_decoder(:)
+integer :: n_seq
+character(:), allocatable :: output_txt
+real(dp) :: t1, t2, t1o, t2o
+integer :: i
+logical :: use_cache
 
-    allocate(byte_decoder(0:maxval(m%byte_encoder)))
-    byte_decoder = 0
-    do i = 0, size(m%byte_encoder)-1
-        byte_decoder(m%byte_encoder(i)) = i
-    end do
+! Compute byte_decoder:
+allocate(byte_decoder(0:maxval(m%byte_encoder)))
+byte_decoder = 0
+do i = 0, size(m%byte_encoder)-1
+    byte_decoder(m%byte_encoder(i)) = i
+end do
 
-    print "(a)", "Input text"
-    print "(a)", input_txt
-    print *
-    print "(a)",  "Encoding: tokenizing input text into tokens (currently slow)..."
-    
-    call cpu_time(t1)
-    input = encode(input_txt, m%decoder_idx, m%decoder_txt, m%vocab_idx, m%vocab_txt, m%byte_encoder)
-    call cpu_time(t2)
-    n_seq = size(input)
-    
-    print "(a,f8.3,a)", "    done. Time:", t2-t1, "s"
-    print *
-    print "(a)", "Input parameters:"
-    print "(a,i4)", "n_seq                =", n_seq
-    print "(a,i4)", "n_tokens_to_generate =", n_tokens_to_generate
-    print *
-    print "(a)", "Input tokens:"
-    print "(1000(i6))", input
-    print *
+print "(a)", "Input text"
+print "(a)", input_txt
 
-    if (n_seq + n_tokens_to_generate >= m%n_ctx) error stop "Sequence length surpassed max ctx."
+print *
+print "(a)",  "Encoding: tokenizing input text into tokens (currently slow)..."
+call cpu_time(t1)
+input = encode(input_txt, m%decoder_idx, m%decoder_txt, m%vocab_idx, m%vocab_txt, &
+    m%byte_encoder)
+call cpu_time(t2)
+n_seq = size(input)
+print "(a,f8.3,a)", "    done. Time:", t2-t1, "s"
+print *
+print "(a)", "Input parameters:"
+print "(a,i4)", "n_seq                =", n_seq
+print "(a,i4)", "n_tokens_to_generate =", n_tokens_to_generate
+print *
+print "(a)", "Input tokens:"
+print "(1000(i6))", input
+print *
 
-    print "(a)", "Decoded input as text:"
-    allocate(character(0) :: output_txt) 
-    output_txt = decode(input, m%decoder_idx, m%decoder_txt, byte_decoder)
-    print "(a)", output_txt
-    print *
+if (n_seq + n_tokens_to_generate >= m%n_ctx) then
+    print *, "The maximum sequence length of the model was surpassed."
+    print *, "Make the input and/or number of tokens to generate shorter."
+    error stop
+end if
 
-    if (input_txt /= output_txt) error stop "The decoded input text does not agree with the input text"
+print "(a)", "Decoded input as text:"
+allocate(character(0) :: output_txt) ! Fix GFortran warning
+output_txt = decode(input, m%decoder_idx, m%decoder_txt, byte_decoder)
+print "(a)", output_txt
+print *
 
-    print "(a)", "Running model..."
-    call cpu_time(t1)
-    t1o = omp_get_wtime()
-    use_cache = .true.
-    call generate(output, n_tokens_to_generate, m, size(input), input, use_cache, byte_decoder)
-    print *
-    t2o = omp_get_wtime()
-    call cpu_time(t2)
-    print "(a,f8.3,a,f4.2,a)", "    done. Time:", t2o-t1o, "s (", (t2-t1)/(t2o-t1o), "x)"
-    print *
-    print "(a)", "Output tokens:"
-    print "(1000(i6))", output
-    output_txt = decode(output, m%decoder_idx, m%decoder_txt, byte_decoder)
-    print *
-    print "(a)", "Decoded output as text:"
-    print "(a)", output_txt
+if (input_txt /= output_txt) then
+    error stop "The decoded input text does not agree with the input text"
+end if
+
+print "(a)", "Running model..."
+call cpu_time(t1)
+t1o = omp_get_wtime()
+use_cache = .true.
+call generate(output, n_tokens_to_generate, m, size(input), input, use_cache, &
+    byte_decoder)
+print *
+t2o = omp_get_wtime()
+call cpu_time(t2)
+print "(a,f8.3,a,f4.2,a)", "    done. Time:", t2o-t1o, "s (", (t2-t1)/(t2o-t1o), "x)"
+print *
+print "(a)", "Output tokens:"
+print "(1000(i6))", output
+output_txt = decode(output, m%decoder_idx, m%decoder_txt, byte_decoder)
+print *
+print "(a)", "Decoded output as text:"
+print "(a)", output_txt
 end subroutine
 
 subroutine gpt2_driver3(input_txt, n_tokens_to_generate, stop_text, m, output_txt)
-    character(*), intent(in) :: input_txt, stop_text
-    integer, intent(in) :: n_tokens_to_generate
-    type(model_t), intent(in) :: m
-    integer, allocatable :: input(:), output(:)
-    integer, allocatable :: byte_decoder(:)
-    integer :: n_seq, i
-    character(:), allocatable, intent(out) :: output_txt
-    logical :: use_cache
-    
-    allocate(byte_decoder(0:maxval(m%byte_encoder)))
-    byte_decoder = 0
-    do i = 0, size(m%byte_encoder)-1
-        byte_decoder(m%byte_encoder(i)) = i
-    end do
-    
-    input = encode(input_txt, m%decoder_idx, m%decoder_txt, m%vocab_idx, m%vocab_txt, m%byte_encoder)
-    n_seq = size(input)
-    
-    if (n_seq + n_tokens_to_generate >= m%n_ctx) error stop "Sequence length surpassed max ctx."
-    
-    allocate(character(0) :: output_txt) 
-    output_txt = decode(input, m%decoder_idx, m%decoder_txt, byte_decoder)
-    
-    if (input_txt /= output_txt) error stop "The decoded input text does not agree with the input text"
-    
-    use_cache = .true.
-    call generate(output, n_tokens_to_generate, m, size(input), input, use_cache, byte_decoder, stop_text)
-    output_txt = decode(output, m%decoder_idx, m%decoder_txt, byte_decoder)
+character(*), intent(in) :: input_txt, stop_text
+integer, intent(in) :: n_tokens_to_generate
+type(model_t), intent(in) :: m
+integer, allocatable :: input(:), output(:)
+integer, allocatable :: byte_decoder(:)
+integer :: n_seq
+character(:), allocatable, intent(out) :: output_txt
+integer :: i
+logical :: use_cache
+! TODO: move the decoder into model_t
+! Compute byte_decoder:
+allocate(byte_decoder(0:maxval(m%byte_encoder)))
+byte_decoder = 0
+do i = 0, size(m%byte_encoder)-1
+    byte_decoder(m%byte_encoder(i)) = i
+end do
+input = encode(input_txt, m%decoder_idx, m%decoder_txt, m%vocab_idx, m%vocab_txt, &
+    m%byte_encoder)
+n_seq = size(input)
+if (n_seq + n_tokens_to_generate >= m%n_ctx) then
+    print *, "The maximum sequence length of the model was surpassed."
+    print *, "Make the input and/or number of tokens to generate shorter."
+    error stop
+end if
+allocate(character(0) :: output_txt) ! Fix GFortran warning
+output_txt = decode(input, m%decoder_idx, m%decoder_txt, byte_decoder)
+if (input_txt /= output_txt) then
+    error stop "The decoded input text does not agree with the input text"
+end if
+use_cache = .true.
+call generate(output, n_tokens_to_generate, m, size(input), input, use_cache, &
+    byte_decoder, stop_text)
+output_txt = decode(output, m%decoder_idx, m%decoder_txt, byte_decoder)
 end subroutine
 
 function get_prompt() result(input)
-    character(:), allocatable :: input
-    character(1024) :: tmp
-    integer ::ios
-    read(*,"(a)",iostat=ios) tmp
-    if (ios == 0) then
-        input = trim(tmp)
-    else
-        input = ""
-    end if
+character(:), allocatable :: input
+character(1024) :: tmp
+integer ::ios
+read(*,"(a)",iostat=ios) tmp
+if (ios == 0) then
+    input = trim(tmp)
+else
+    input = ""
+end if
 end function
 
 subroutine chat(inputs)
-    type(string), optional, intent(in) :: inputs(:)
-    type(model_t) :: m
-    character(:), allocatable :: prompt, input, output
-    integer :: i, n_prompts
-    
-    call load_model("model.gguf", m)
-    
-    prompt = "Your name is fastGPT and you are an AI bot. The user will ask you &
-    &questions and you answer in a nice, truthful, short way." // LF // "&
-    &User: What is the capital of Czechia?" // LF // "&
-    &fastGPT: Prague." // LF // "&
-    &User: How many legs does a dog have?" // LF // "&
-    &fastGPT: Four." // LF // "&
-    &User:"
-    write(*,"(a)",advance="no") prompt
-    
+type(string), optional, intent(in) :: inputs(:)
+type(model_t) :: m
+character(:), allocatable :: prompt, input, output
+integer :: i, n_prompts
+call load_model("model.gguf", m)
+prompt = "Your name is fastGPT and you are an AI bot. The user will ask you &
+&questions and you answer in a nice, truthful, short way." // LF // "&
+&User: What is the capital of Czechia?" // LF // "&
+&fastGPT: Prague." // LF // "&
+&User: How many legs does a dog have?" // LF // "&
+&fastGPT: Four." // LF // "&
+&User:"
+write(*,"(a)",advance="no") prompt
+if (present(inputs)) then
+    n_prompts = size(inputs)
+else
+    n_prompts = 1024
+end if
+do i = 1, n_prompts
+    write(*,"(a)",advance="no")  " "
     if (present(inputs)) then
-        n_prompts = size(inputs)
+        input = inputs(i)%s
+        write(*,"(a)") input
     else
-        n_prompts = 1024
+        input = get_prompt()
+        if (input == "") exit
     end if
-    
-    do i = 1, n_prompts
-        write(*,"(a)",advance="no")  " "
-        if (present(inputs)) then
-            input = inputs(i)%s
-            write(*,"(a)") input
-        else
-            input = get_prompt()
-            if (input == "") exit
-        end if
-        write(*,"(a)",advance="no") "fastGPT:"
-        prompt = prompt // " " // input // LF // "fastGPT:"
-        call gpt2_driver3(prompt, 200, "User:", m, output)
-        prompt = prompt // output
-    end do
-    print *
+    write(*,"(a)",advance="no") "fastGPT:"
+    prompt = prompt // " " // input // LF // "fastGPT:"
+    call gpt2_driver3(prompt, 200, "User:", m, output)
+    prompt = prompt // output
+end do
+print *
 end subroutine
 
 end module
