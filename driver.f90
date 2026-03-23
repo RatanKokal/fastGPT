@@ -1,7 +1,7 @@
 module driver
 use gpt2_mod, only: generate, model_t
 use tokenizer, only: encode, decode, string
-use iso_fortran_env, only: int64
+use omp, only: omp_get_wtime
 implicit none
 
 integer, parameter :: sp = kind(0.0)
@@ -9,16 +9,6 @@ integer, parameter :: dp = kind(0.d0)
 character(1), parameter :: LF = achar(10)
 
 contains
-
-real(dp) function high_precision_time()
-    integer(int64) :: count, rate
-    call system_clock(count, rate)
-    if (rate > 0_int64) then
-        high_precision_time = real(count, dp) / real(rate, dp)
-    else
-        high_precision_time = 0._dp
-    end if
-end function
 
 subroutine load_input(filename, input_txt, n_tokens_to_generate)
     character(*), intent(in) :: filename
@@ -168,9 +158,9 @@ subroutine gpt2_driver(input, output, m)
     call load_input("input", input_txt, n_tokens_to_generate)
 
     print "(a)", "Loading the model..."
-    t1 = high_precision_time()
+    call cpu_time(t1)
     call load_model("model.gguf", m)
-    t2 = high_precision_time()
+    call cpu_time(t2)
     print "(a,f8.3,a,i2)", "    done. Time:", t2-t1, "s, Model file version:", m%model_file_version
     print *
     print "(a)", "Model parameters:"
@@ -192,7 +182,7 @@ subroutine gpt2_driver2(input_txt, n_tokens_to_generate, m, input, output)
     integer, allocatable :: byte_decoder(:)
     integer :: n_seq, i
     character(:), allocatable :: output_txt
-    real(dp) :: t1, t2
+    real(dp) :: t1, t2, t1o, t2o
     logical :: use_cache
 
     allocate(byte_decoder(0:maxval(m%byte_encoder)))
@@ -206,9 +196,9 @@ subroutine gpt2_driver2(input_txt, n_tokens_to_generate, m, input, output)
     print *
     print "(a)",  "Encoding: tokenizing input text into tokens (currently slow)..."
     
-    t1 = high_precision_time()
+    call cpu_time(t1)
     input = encode(input_txt, m%decoder_idx, m%decoder_txt, m%vocab_idx, m%vocab_txt, m%byte_encoder)
-    t2 = high_precision_time()
+    call cpu_time(t2)
     n_seq = size(input)
     
     print "(a,f8.3,a)", "    done. Time:", t2-t1, "s"
@@ -232,12 +222,14 @@ subroutine gpt2_driver2(input_txt, n_tokens_to_generate, m, input, output)
     if (input_txt /= output_txt) error stop "The decoded input text does not agree with the input text"
 
     print "(a)", "Running model..."
-    t1 = high_precision_time()
+    call cpu_time(t1)
+    t1o = omp_get_wtime()
     use_cache = .true.
     call generate(output, n_tokens_to_generate, m, size(input), input, use_cache, byte_decoder)
     print *
-    t2 = high_precision_time()
-    print "(a,f8.3,a)", "    done. Time:", t2-t1, "s"
+    t2o = omp_get_wtime()
+    call cpu_time(t2)
+    print "(a,f8.3,a,f4.2,a)", "    done. Time:", t2o-t1o, "s (", (t2-t1)/(t2o-t1o), "x)"
     print *
     print "(a)", "Output tokens:"
     print "(1000(i6))", output
